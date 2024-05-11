@@ -18,7 +18,6 @@ public class Client{
             GSPRemoteInterface stub = (GSPRemoteInterface) Naming.lookup(GetPropValues.getRemoteObjectReference());
             int n1 = 3;
             int n2 = 4;
-            System.out.println("We are in client now");
             /*
             Whatever the client is going to do here
              */
