@@ -11,6 +11,7 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
 
     @Override
     public String query(int node1, int node2) throws RemoteException {
+        System.out.println("Query from server JVM");
         return "GSPRemoteObject.query called";
     }
 

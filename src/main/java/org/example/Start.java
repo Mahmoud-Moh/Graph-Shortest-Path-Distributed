@@ -14,18 +14,18 @@ public class Start {
         CountDownLatch latch = new CountDownLatch(1);
         
         // Create the server thread
-        Thread serverThread = new ServerThread(latch);
+        //Thread serverThread = new ServerThread(latch);
         
         // Start the server thread (it should start reading the graph)
-        serverThread.start();
+        //serverThread.start();
         
-        latch.await(); // Wait for server's signal
+        //latch.await(); // Wait for server's signal
 
-        System.out.println("Received signal from the server thread, starting clients...");
+        //System.out.println("Received signal from the server thread, starting clients...");
         
         // Start the client processes 
         // ...
 
-        serverThread.join(); // Or detach?
+        //serverThread.join(); // Or detach?
     }
 }
