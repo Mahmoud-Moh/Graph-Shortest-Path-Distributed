@@ -24,4 +24,11 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     public String delete(int node1, int node2) throws RemoteException {
         return "GSPRemoteObject.delete called";
     }
+
+    @Override
+    public void block_5s(long i) throws RemoteException, InterruptedException {
+        System.out.println("This is the thread" + i + " sleep.");
+        Thread.sleep(5000);
+        System.out.println("5 seconds passed");
+    }
 }

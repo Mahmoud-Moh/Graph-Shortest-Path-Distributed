@@ -7,4 +7,5 @@ public interface GSPRemoteInterface extends Remote {
     public String query(int int1, int int2) throws RemoteException;
     public String insert(int int1, int int2) throws RemoteException;
     public String delete(int int1, int int2) throws RemoteException;
+    public void block_5s(long i) throws RemoteException, InterruptedException;
 }
