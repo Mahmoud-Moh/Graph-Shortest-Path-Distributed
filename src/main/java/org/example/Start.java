@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-import org.example.server.ServerT;
 import org.example.server.ServerThread;
 
 public class Start {
@@ -24,7 +23,7 @@ public class Start {
 
         System.out.println("Received signal from the server thread, starting clients...");
         
-        // Start the client processes
+        // Start the client processes 
         // ...
 
         serverThread.join(); // Or detach?

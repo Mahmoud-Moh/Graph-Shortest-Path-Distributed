@@ -1,5 +1,6 @@
 package org.example.server;
 
+import org.example.server.graph.Graph;
 import org.example.utils.GetPropValues;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
 public class ServerThread extends Thread {
     private CountDownLatch latch;   // To signal the parent thread (Start.java:main) when ready to handle requests.
     private int port = 49053;
+    private Graph graph;
 
     public ServerThread(CountDownLatch latch) {
         this.latch = latch;
@@ -40,7 +42,7 @@ public class ServerThread extends Thread {
     @Override
     public void run() {
         // Read Graph from standard input.
-        // ...
+        graph = GraphReader.readGraph();
 
         // Signal the parent thread when ready.
         latch.countDown();
