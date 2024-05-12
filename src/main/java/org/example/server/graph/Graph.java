@@ -3,7 +3,14 @@ package org.example.server.graph;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
+
+enum Algorithm {
+    BFS,
+    BidirectionalBFS
+}
 
 public class Graph {
     int numOfNodes;
@@ -70,5 +77,45 @@ public class Graph {
     // get all neighbors of a node, returns null if node doesn't exist in the graph.
     public Set<Integer> getNeighbors(int node) {
         return adj.getOrDefault(node, null);
+    }
+    
+
+    public int shortestPath(int u, int v , Algorithm algorithm) {
+        if (algorithm == Algorithm.BFS) {
+            return BFS(u, v);
+        } else if (algorithm == Algorithm.BidirectionalBFS) {
+            return bidirectionalBFS(u, v);
+        }
+        return 0;
+    }
+    
+    private int BFS(int u, int v){
+        if (u == v) return 0;
+        HashMap<Integer, Integer> visited= new HashMap<>();
+        Queue<Integer> queue = new LinkedList<>();
+        
+        visited.put(u, 0);
+        queue.add(u);
+        
+        while (!queue.isEmpty()) {
+            int current= queue.remove();
+            if (adj.containsKey(current)) {
+                for (int neighbor : adj.get(current)) {
+                    if (!visited.containsKey(neighbor)) {
+                        if(neighbor == v)
+                            return visited.get(current) + 1;  
+                        visited.put(neighbor, visited.get(current) + 1);
+                        queue.add(neighbor);
+                    }
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    int bidirectionalBFS(int u, int v){
+        if (u == v) return 0;
+        return -1;
     }
 }
