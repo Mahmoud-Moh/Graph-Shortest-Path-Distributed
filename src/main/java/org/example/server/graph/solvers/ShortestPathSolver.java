@@ -1,5 +1,7 @@
-package org.example.server.graph.ShortestPathSolvers;
+package org.example.server.graph.solvers;
 
-public interface ShortestPathSolver { // to allow switching to a different algo later if ever needed    
-    
+
+// To allow switching to a different algo later if ever needed.    
+public interface ShortestPathSolver { 
+
 }

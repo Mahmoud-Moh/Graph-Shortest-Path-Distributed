@@ -2,40 +2,91 @@ package org.example.client;
 
 
 import org.example.server.GSPRemoteInterface;
-import org.example.server.GSPRemoteObject;
 import org.example.utils.GetPropValues;
 
 import java.io.IOException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
-import java.util.Properties;
+import java.rmi.RemoteException;
+import java.util.Random;
 
 public class Client{
-    public static void main(String args[]) {
+    private static String logFilePath = "log.csv";
+
+    public static GSPRemoteInterface setupStub(){
         //Get Rmi Registery Server and port from system.properties
         try {
-            GSPRemoteInterface stub = (GSPRemoteInterface) Naming.lookup(GetPropValues.getRemoteObjectReference());
-            int n1 = 3;
-            int n2 = 4;
-            /*
-            Whatever the client is going to do here
-             */
-            for(int i=0; i<1000; i++){
-                if(i % 10 == 0){
-                    System.out.println(stub.delete(n1, n2));
-                }
+            return (GSPRemoteInterface) Naming.lookup(GetPropValues.getRemoteObjectReference());
+        } catch (NotBoundException | IOException e) {
+            e.printStackTrace();
+            return null;
+        } 
+    }
+    public static void main(String[] args) {
+        int maxRequests;
+        int clientId;
+        Random random = new Random();
+        try{
+            clientId = Integer.parseInt(args[0]);
+            maxRequests = Integer.parseInt(args[1]);
+        } catch(NumberFormatException e){
+            e.printStackTrace();
+            clientId =random.nextInt();
+            maxRequests = 10;
+        }
+        logFilePath = "log" + clientId;
 
-                else if(i % 5 == 0){
-                    System.out.println(stub.insert(n1, n2));
-                }
-                else{
-                    System.out.println(stub.query(n1, n2));
-                }
+        // Initialize the stub
+        GSPRemoteInterface stub = setupStub();
+        if(stub==null){
+            System.exit(0);
+        }
+        
+        // Initialize the batch generator
+        BatchGenerator batchGenerator = new BatchGenerator(42, 30, 10);
+
+        // Initialize the batch size random variable
+        NormalRandomVariable batchSizeVariable = new NormalRandomVariable(10, 5);
+
+        // Initialize batch index
+        int i = 0;
+        while(i < maxRequests){
+            // determine the size for the next batch
+            int batchSize = 10 + (int) Math.min(Math.max(batchSizeVariable.nextValue(), 0), 30);
+            
+            // generate the batch
+            String batch = batchGenerator.generateBatch(batchSize);
+
+            try {
+                // Record timestamp before RMI call
+                long startTimestamp = System.currentTimeMillis();
+                
+                // Perform RMI call
+                String batchOutput = stub.processBatch(batch);
+                
+                // Record timestamp after RMI call
+                long endTimestamp = System.currentTimeMillis();
+
+                // Calculate latency
+                long latency = endTimestamp - startTimestamp;
+ 
+                // Log the generated batch, returned batchOutput, timestamps and latency
+                ClientLogger.log(logFilePath, i, startTimestamp, endTimestamp, latency, batch, batchOutput);
+
+            } catch (RemoteException e) {
+                e.printStackTrace();
+                ClientLogger.log(logFilePath, i, -1, -1, -1, batch, e.getMessage());
+            }   
+
+            // Sleep for some random time
+            try {
+                int delay = random.nextInt(10000); // Random delay between 0 to 10000 ms
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (NotBoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+            i++;
         }
     }
 }

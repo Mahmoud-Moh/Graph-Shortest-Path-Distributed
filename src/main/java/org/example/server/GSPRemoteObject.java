@@ -11,7 +11,6 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
 
     @Override
     public String processBatch(String batch) throws RemoteException {
-        
-        return "GSPRemoteObject.delete called";
+        return "GSPRemoteObject.processBatch called";
     }
 }

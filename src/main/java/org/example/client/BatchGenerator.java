@@ -8,6 +8,11 @@ public class BatchGenerator {
     Random random;
     NormalRandomVariable writePercentageVariable; 
 
+    public void adjustWritePercentageVariable(double newMean, double newDeviation){
+        writePercentageVariable.setMean(newMean);
+        writePercentageVariable.setStdDev(newDeviation);
+    }
+
     public BatchGenerator(double writePercentageMean, double writePercentageDeviation) {
         random = new Random(42);
         writePercentageVariable= new NormalRandomVariable(random, writePercentageMean, writePercentageDeviation);
@@ -18,11 +23,14 @@ public class BatchGenerator {
     }
 
     public String generateBatch(int numOfOperations) {
-        return generateBatch(numOfOperations, writePercentageVariable.nextValue());
+        return generateBatch(numOfOperations, 50);
     }
-    public String generateBatch(int numOfOperations, double percentageOfWrite) {
-        return generateBatch(numOfOperations, percentageOfWrite/2, percentageOfWrite/2);
+    public String generateBatch(int numOfOperations, double addOfWritePercentage) {
+        double writePercentage = Math.min(Math.max(writePercentageVariable.nextValue(), 0), 100);
+        double addPercentage = (addOfWritePercentage / 100) * writePercentage;
+        return generateBatch(numOfOperations, addPercentage, writePercentage-addPercentage);
     }
+
 
     public String generateBatch(int numOfOperations, double percentageOfAdd, double percentageOfDelete) {
         StringBuilder batchString = new StringBuilder();
