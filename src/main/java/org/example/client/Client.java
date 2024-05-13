@@ -23,31 +23,50 @@ public class Client{
         } 
     }
     public static void main(String[] args) {
-        int maxRequests;
-        String clientId = "";
-        Random random = new Random();
 
+        int numOfRequests = 10;
+        String clientId = "";
         int seed;
-        try{
+        boolean fixedSleepMode = false;
+        int sleepDuration;
+
+        try {
             clientId = args[0];
-            maxRequests = Integer.parseInt(args[1]);
-        } catch(NumberFormatException e){
-            e.printStackTrace();
-            maxRequests = 10;
+            numOfRequests = Integer.parseInt(args[1]);
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            System.err.println("Invalid arguments. Usage: java Main <clientId> <numOfRequests> [<seed> <sleepDuration>]");
+            numOfRequests = 10;
         }
+
         try{
             seed = Integer.parseInt(args[2]);
-        } catch(NumberFormatException e){
-            e.printStackTrace();
-            seed = random.nextInt();
+        } catch(NumberFormatException | ArrayIndexOutOfBoundsException e){
+            System.err.println("Invalid arguments. Usage: java Main <clientId> <numOfRequests> [<seed> <sleepDuration>]");
+            seed = 42;
         }
+
+        Random random = new Random(seed*10L);
+
+        try{
+            sleepDuration = Integer.parseInt(args[3]);
+            fixedSleepMode = true;
+        } catch(NumberFormatException e){
+            System.err.println("Invalid arguments. Usage: java Main <clientId> <numOfRequests> [<seed> <sleepDuration>]");
+            System.exit(2);
+            return;
+        } catch(ArrayIndexOutOfBoundsException e){
+            fixedSleepMode = false;
+            sleepDuration = random.nextInt(10000);
+        }
+
         
-        
+
         logFilePath = "log" + clientId + ".csv";
+
         // Initialize the stub
         GSPRemoteInterface stub = setupStub();
         if(stub==null){
-            System.exit(0);
+            System.exit(3);
         }
         
         // Initialize the batch generator
@@ -58,19 +77,24 @@ public class Client{
 
         // Initialize batch index
         int i = 0;
-        while(i < maxRequests){
+
+        while(i < numOfRequests){
             // determine the size for the next batch
             int batchSize = 10 + (int) Math.min(Math.max(batchSizeVariable.nextValue(), 0), 30);
             
             // generate the batch
             String batch = batchGenerator.generateBatch(batchSize);
 
+            if(!fixedSleepMode){
+                sleepDuration = random.nextInt(10000);
+            }
+
             try {
                 // Record timestamp before RMI call
                 long startTimestamp = System.currentTimeMillis();
                 
                 // Perform RMI call
-                String batchOutput = stub.processBatch(batch);
+                String batchOutput = stub.processBatch(clientId, batch);
                 
                 // Record timestamp after RMI call
                 long endTimestamp = System.currentTimeMillis();
@@ -79,17 +103,16 @@ public class Client{
                 long latency = endTimestamp - startTimestamp;
  
                 // Log the generated batch, returned batchOutput, timestamps and latency
-                ClientLogger.log(logFilePath, i, startTimestamp, endTimestamp, latency, batch, batchOutput);
+                ClientLogger.log(logFilePath, i, startTimestamp, endTimestamp, latency, batch, batchOutput, batchGenerator.mostRecentWritePercentage, batchSize, sleepDuration);
 
             } catch (RemoteException e) {
                 e.printStackTrace();
-                ClientLogger.log(logFilePath, i, -1, -1, -1, batch, e.getMessage());
+                ClientLogger.log(logFilePath, i, -1, -1, -1, batch, e.getMessage(),batchGenerator.mostRecentWritePercentage, batchSize, sleepDuration);
             }   
 
             // Sleep for some random time
             try {
-                int delay = random.nextInt(10000); // Random delay between 0 to 10000 ms
-                Thread.sleep(delay);
+                Thread.sleep(sleepDuration);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

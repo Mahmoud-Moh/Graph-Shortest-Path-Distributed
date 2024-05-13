@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
+import org.example.server.GSPRemoteInterface;
+import org.example.server.GSPRemoteObject;
 import org.example.server.ServerThread;
 import org.example.utils.GetPropValues;
 
@@ -19,7 +21,7 @@ public class Start {
         CountDownLatch latch = new CountDownLatch(1);
         
         // Create the server thread
-        Thread serverThread = new ServerThread(latch);
+        ServerThread serverThread = new ServerThread(latch);
         
         // Start the server thread (it should start reading the graph)
         serverThread.start();
@@ -28,7 +30,6 @@ public class Start {
 
         System.out.println("Received signal from the server thread, starting clients...");
         
-
         // Start the client processes 
         try{
             
@@ -59,13 +60,16 @@ public class Start {
             // Join on the processes
             for (Process process : processes) {
                 int exitCode = process.waitFor();
-                // Print the exit code of the process
                 System.out.println("Exited with error code " + exitCode);
             }
+
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+        
+        GSPRemoteObject gsp = serverThread.getGsp();
+        gsp.report()
 
-        serverThread.join(); // wait for the server thread
+        serverThread.join(); // Wait for the server thread
     }
 }

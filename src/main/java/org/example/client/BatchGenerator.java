@@ -7,6 +7,7 @@ import java.util.Random;
 public class BatchGenerator {    
     Random random;
     NormalRandomVariable writePercentageVariable; 
+    double mostRecentWritePercentage = -1;
 
     public void adjustWritePercentageVariable(double newMean, double newDeviation){
         writePercentageVariable.setMean(newMean);
@@ -25,11 +26,16 @@ public class BatchGenerator {
     public String generateBatch(int numOfOperations) {
         return generateBatch(numOfOperations, 50);
     }
+    
     public String generateBatch(int numOfOperations, double addOfWritePercentage) {
         double writePercentage = Math.min(Math.max(writePercentageVariable.nextValue(), 0), 100);
+        mostRecentWritePercentage = writePercentage;
         double addPercentage = (addOfWritePercentage / 100) * writePercentage;
         return generateBatch(numOfOperations, addPercentage, writePercentage-addPercentage);
     }
+
+
+
 
 
     public String generateBatch(int numOfOperations, double percentageOfAdd, double percentageOfDelete) {
