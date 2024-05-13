@@ -115,7 +115,62 @@ public class Graph {
     }
 
     int bidirectionalBFS(int u, int v){
-        if (u == v) return 0;
+        // Queue for BFS from start and end nodes
+        Queue<Integer> startQueue = new LinkedList<>();
+        Queue<Integer> endQueue = new LinkedList<>();
+        
+        // Visited sets for start and end BFS
+        HashSet<Integer> startVisited = new HashSet<>();
+        HashSet<Integer> endVisited = new HashSet<>();
+        
+        // Initialize start and end queues and visited sets
+        startQueue.add(u);
+        endQueue.add(v);
+        startVisited.add(u);
+        endVisited.add(v);
+        
+        // Steps from start and end
+        int stepsStart = 0;
+        int stepsEnd = 0;
+        
+        // Start BFS from both start and end nodes
+        while (!startQueue.isEmpty() && !endQueue.isEmpty()) {
+            // Perform BFS from start node
+            stepsStart++;
+            int size = startQueue.size();
+            for (int i = 0; i < size; i++) {
+                int currentStart = startQueue.poll();
+                for (int neighbor : adj.getOrDefault(currentStart, new HashSet<>())) {
+                    if (!startVisited.contains(neighbor)) {
+                        startQueue.add(neighbor);
+                        startVisited.add(neighbor);
+                    }
+                }
+                if (endVisited.contains(currentStart)) {
+                    return stepsStart + stepsEnd - 1; // Subtract 1 because we count the meeting node twice
+                }
+            }
+            
+            // Perform BFS from end node
+            stepsEnd++;
+            size = endQueue.size();
+            for (int i = 0; i < size; i++) {
+                int currentEnd = endQueue.poll();
+                for (int neighbor : adj.getOrDefault(currentEnd, new HashSet<>())) {
+                    if (!endVisited.contains(neighbor)) {
+                        endQueue.add(neighbor);
+                        endVisited.add(neighbor);
+                    }
+                }
+                if (startVisited.contains(currentEnd)) {
+                    return stepsStart + stepsEnd - 1; // Subtract 1 because we count the meeting node twice
+                }
+            }
+        }
+        
         return -1;
     }
+
+
+
 }
