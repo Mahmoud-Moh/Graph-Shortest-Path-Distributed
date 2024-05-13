@@ -24,7 +24,7 @@ public class NormalRandomVariable {
     
 
     public NormalRandomVariable(double mean, double stdDev) {
-        this.random = new Random(42);
+        this.random = new Random();
         this.mean = mean;
         this.stdDev = stdDev;
     }

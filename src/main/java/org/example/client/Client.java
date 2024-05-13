@@ -24,18 +24,26 @@ public class Client{
     }
     public static void main(String[] args) {
         int maxRequests;
-        int clientId;
+        String clientId = "";
         Random random = new Random();
+
+        int seed;
         try{
-            clientId = Integer.parseInt(args[0]);
+            clientId = args[0];
             maxRequests = Integer.parseInt(args[1]);
         } catch(NumberFormatException e){
             e.printStackTrace();
-            clientId =random.nextInt();
             maxRequests = 10;
         }
-        logFilePath = "log" + clientId;
-
+        try{
+            seed = Integer.parseInt(args[2]);
+        } catch(NumberFormatException e){
+            e.printStackTrace();
+            seed = random.nextInt();
+        }
+        
+        
+        logFilePath = "log" + clientId + ".csv";
         // Initialize the stub
         GSPRemoteInterface stub = setupStub();
         if(stub==null){
@@ -43,10 +51,10 @@ public class Client{
         }
         
         // Initialize the batch generator
-        BatchGenerator batchGenerator = new BatchGenerator(42, 30, 10);
+        BatchGenerator batchGenerator = new BatchGenerator(seed, 30, 10);
 
         // Initialize the batch size random variable
-        NormalRandomVariable batchSizeVariable = new NormalRandomVariable(10, 5);
+        NormalRandomVariable batchSizeVariable = new NormalRandomVariable(random, 10, 5);
 
         // Initialize batch index
         int i = 0;

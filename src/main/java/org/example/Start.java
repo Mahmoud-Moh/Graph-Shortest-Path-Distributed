@@ -10,6 +10,10 @@ import org.example.server.ServerThread;
 import org.example.utils.GetPropValues;
 
 public class Start {
+            
+    // Specify the classpath
+    static final String CLASSPATH = "D:\\Github\\Graph-Shortest-Path-Distributed\\target\\classes";
+            
     public static void main(String[] args) throws IOException, InterruptedException {
         // a signaling mechanism to get notified when the server thread is ready to recieve requests
         CountDownLatch latch = new CountDownLatch(1);
@@ -24,15 +28,8 @@ public class Start {
 
         System.out.println("Received signal from the server thread, starting clients...");
         
+
         // Start the client processes 
-
-        // Specify the classpath
-        String classpath = "D:\\Github\\Graph-Shortest-Path-Distributed\\target\\classes";
-
-        // List of arguments
-
-        // Array to hold references to the processes
-        
         try{
             
             Properties props = GetPropValues.getPropValues();
@@ -44,15 +41,19 @@ public class Start {
             for(int i=0; i< numOfClients; i++){
                 clientIds[i] = props.getProperty("GSP.node"+i);
             }
+
+            int seed = 42;
             for (int i = 0; i < clientIds.length; i++) {
                 // Command to run the client process
-                String[] command = {"java", "-cp", classpath, "org.example.client.Client", clientIds[i]};
+                String[] command = {"java", "-cp", CLASSPATH, "org.example.client.Client", String.valueOf(i), "3", String.valueOf(seed)};
 
                 // Create a ProcessBuilder with the command
                 ProcessBuilder pb = new ProcessBuilder(command);
 
                 // Start the process and store reference to it
                 processes[i] = pb.start();
+
+                seed++;
             }
 
             // Join on the processes
