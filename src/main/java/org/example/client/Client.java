@@ -23,7 +23,6 @@ public class Client{
         } 
     }
     public static void main(String[] args) {
-
         int numOfRequests = 10;
         String clientId = "";
         int seed;
@@ -69,6 +68,13 @@ public class Client{
             System.exit(3);
         }
         
+        // Subscribe to the server
+        try {
+            stub.subscribe("node"+clientId);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        
         // Initialize the batch generator
         BatchGenerator batchGenerator = new BatchGenerator(seed, 30, 10);
 
@@ -94,7 +100,7 @@ public class Client{
                 long startTimestamp = System.currentTimeMillis();
                 
                 // Perform RMI call
-                String batchOutput = stub.processBatch(clientId, batch);
+                String batchOutput = stub.processBatch("node"+clientId, batch);
                 
                 // Record timestamp after RMI call
                 long endTimestamp = System.currentTimeMillis();
@@ -118,6 +124,12 @@ public class Client{
             }
 
             i++;
+        }
+        // Unsubscribe to the server
+        try {
+            stub.unSubscribe("node"+clientId);
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 }

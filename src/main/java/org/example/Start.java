@@ -14,7 +14,8 @@ import org.example.utils.GetPropValues;
 public class Start {
             
     // Specify the classpath
-    static final String CLASSPATH = "D:\\Github\\Graph-Shortest-Path-Distributed\\target\\classes";
+    static final String CLASSPATH = "target\\classes";
+    private static final String SERVER_LOG_DIRECTORY = "";
             
     public static void main(String[] args) throws IOException, InterruptedException {
         // a signaling mechanism to get notified when the server thread is ready to recieve requests
@@ -68,7 +69,7 @@ public class Start {
         }
         
         GSPRemoteObject gsp = serverThread.getGsp();
-        gsp.report()
+        gsp.report(SERVER_LOG_DIRECTORY);
 
         serverThread.join(); // Wait for the server thread
     }

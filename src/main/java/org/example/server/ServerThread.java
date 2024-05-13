@@ -31,7 +31,7 @@ public class ServerThread extends Thread {
             port = Integer.parseInt(props.getProperty("GSP.rmiregistry.port"));
             
             // Create Object of the implementation of remote interface
-            gsp = new GSPRemoteObject();
+            this.gsp = new GSPRemoteObject();
 
             // Bind the remote object with the name //rmi:://localhost:port/gsp
             LocateRegistry.createRegistry(port);

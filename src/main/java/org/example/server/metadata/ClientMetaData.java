@@ -3,11 +3,11 @@ package org.example.server.metadata;
 public class ClientMetaData {
     String clientId;
     boolean unSubscribed;
-    Long subscriptionTimeStamp;
-    Long unSubscriptionTimeStamp;
+    long subscriptionTimeStamp;
+    long unSubscriptionTimeStamp;
 
-    int totalRequests;
-    Long totalProcessingTime;
+    int totalRequests = 0;
+    long totalProcessingTime = 0;
     
     public String getClientId() {
         return clientId;
