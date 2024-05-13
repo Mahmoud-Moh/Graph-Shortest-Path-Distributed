@@ -10,17 +10,8 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     }
 
     @Override
-    public String query(int node1, int node2) throws RemoteException {
-        return "GSPRemoteObject.query called";
-    }
-
-    @Override
-    public String insert(int node1, int node2) throws RemoteException {
-        return "GSPRemoteObject.insert called" + String.valueOf(node1 + node2);
-    }
-
-    @Override
-    public String delete(int node1, int node2) throws RemoteException {
+    public String processBatch(String batch) throws RemoteException {
+        
         return "GSPRemoteObject.delete called";
     }
 }

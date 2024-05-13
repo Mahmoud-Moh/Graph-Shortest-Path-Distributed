@@ -1,0 +1,43 @@
+Time:
+
+    Process operations in parallel:
+        - if you come across a consecutive series of operations of the same type, perform them in parallel.
+
+    Caching shortest-path quey outputs:
+        - store the results of the most recent shortes-path queries.
+        - use them to reply to new queries.
+        - use a dirty flag or discard the cache when the graph is modified.
+
+    Try a different algo (ex: bellman-ford) to compute multiple shortest-path queries effeciently  
+
+    PreComputing queries (query anticipation):
+        - compute the shortest-paths before a query arrives, maybe when a node gets added?
+        * we are not dealing with real human clients, hence I'd argue anticiaption becomes fruitless. (a human client would usually add a node then queries shortest path between that node and another)
+
+    Process add/delete operations in parallel:
+        - if u come across a *really long* series of adds and deletes:
+            ```
+                add 
+                delete
+                add 
+                add
+                delete
+                ..
+                ..
+                ..
+                delete
+            ```
+            there might be a way to perform them in parallel, by introducing the idea of ghost edges or negative edges,
+            we can discuss it in a meeting if there's time.
+
+Memory:
+
+    Remove edgeless nodes every now and then:
+        - when all the edges from and to a node get deleted, you can delete the node entry from the graph.
+
+
+ 
+
+
+
+ 

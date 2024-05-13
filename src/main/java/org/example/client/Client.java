@@ -3,7 +3,6 @@ package org.example.client;
 
 import org.example.server.GSPRemoteInterface;
 import org.example.server.GSPRemoteObject;
-import org.example.server.graph.Node;
 import org.example.utils.GetPropValues;
 
 import java.io.IOException;
