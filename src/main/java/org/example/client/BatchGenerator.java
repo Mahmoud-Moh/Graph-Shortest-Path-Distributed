@@ -39,10 +39,6 @@ public class BatchGenerator {
         return generateBatch(numOfOperations, addPercentage, writePercentage-addPercentage);
     }
 
-
-
-
-
     public String generateBatch(int numOfOperations, double percentageOfAdd, double percentageOfDelete) {
         StringBuilder batchString = new StringBuilder();
         int addOps = 0;
@@ -50,7 +46,6 @@ public class BatchGenerator {
         int queryOps = 0;
         while (numOfOperations > 0) {
             char operationType;
-
             // determine the type of operation based on the percentage of writes
             int randomNumber = random.nextInt(100);
             if (randomNumber < percentageOfAdd) {
@@ -65,8 +60,8 @@ public class BatchGenerator {
             }
             
             // generate two random positive integer node IDs
-            int nodeID1 = random.nextInt(100) + 1;
-            int nodeID2 = random.nextInt(100) + 1;
+            int nodeID1 = random.nextInt(10) + 1;
+            int nodeID2 = random.nextInt(10) + 1;
             
             // append the operation to the batch
             batchString.append(operationType).append(" ").append(nodeID1).append(" ").append(nodeID2).append("\n");

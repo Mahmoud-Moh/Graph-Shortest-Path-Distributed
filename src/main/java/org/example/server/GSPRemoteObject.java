@@ -12,7 +12,7 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     int maxClients = 0;
     Long startTimeStamp;
 
-    Graph graph = null;
+    Graph graph = Graph.getInstance(); ;
     
     // cache query outputs? (variant idea)
     public void report(String outputDirectory){
@@ -47,8 +47,12 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         }
     }
 
+    
+
     @Override
     public synchronized String processBatch(String nodeId, String batch) throws RemoteException {
+       
+        System.out.println("Server received a batch from " + nodeId);
         System.out.println(batch);
         // If not subscribed, do not serve
         if((!clients.containsKey(nodeId)) || clients.get(nodeId).isUnSubscribed()){
@@ -57,8 +61,15 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
 
         Long processingStartTimeStamp = System.currentTimeMillis();
         
-        // TODO: Process the Batch of operations and return the query outputs (a String of multiple lines).
-        // ..
+        System.out.println("Server started a batch");
+		StringBuilder result = new StringBuilder();
+		String[] batchLines=batch.split("\n");
+		for(String line : batchLines){
+			proccessBatchLine(nodeId, line, result);
+		}
+        System.out.println("Server finished a batch");
+        System.out.println(result.toString());
+	
         
         Long processingEndTimeStamp = System.currentTimeMillis();
         Long processingTime = processingEndTimeStamp - processingStartTimeStamp;
@@ -70,6 +81,33 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         // Return the batch output
         return "GSPRemoteObject.processBatch called";
     }
+
+    private void proccessBatchLine(String nodeId, String line, StringBuilder result) {
+        String[] operation =line.split(" ");
+        char queryType =operation[0].charAt(0);
+        if (queryType == 'F') {
+            return ;
+        }
+        int u = Integer.parseInt(operation[1]);
+        int v = Integer.parseInt(operation[2]);
+
+        if(queryType == 'A'){
+            graph.addEdge(u, v);
+            System.out.println("Edge added from " + u + " to " + v);
+        }
+        else if(queryType == 'D'){
+            graph.removeEdge(u, v);
+            System.out.println("Edge removed from " + u + " to " + v);
+        }
+        else{
+            int out = graph.shortestPath(u, v, "BFS");
+            System.out.println("Shortest path between " + u + " and " + v + " usign " + "BFS" + " is: " + out);
+            result.append(out);
+            result.append("\n");
+        }
+        return ;
+    }
+ 
 
     @Override
     public void x(String nodeId) throws RemoteException {

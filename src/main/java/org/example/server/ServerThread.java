@@ -49,7 +49,7 @@ public class ServerThread extends Thread {
     public void run() {
         // Read Graph from standard input.
         this.graph = GraphReader.readGraph();
-
+        
 
 
         gsp.graph = this.graph;

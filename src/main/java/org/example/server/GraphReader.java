@@ -7,7 +7,7 @@ import org.example.server.graph.Graph;
 public class GraphReader {
     public static Graph readGraph() {
         Scanner scanner = new Scanner(System.in);
-        Graph graph = new Graph();
+        Graph graph = Graph.getInstance();
         
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine().trim();
