@@ -106,7 +106,6 @@ public class Client{
 
             int sleepDuration = random.nextInt(sleepDurationHighBound - sleepDurationLowBound + 1) + sleepDurationLowBound;
 
-
             try {
                 // Record timestamp before RMI call
                 long startTimestamp = System.currentTimeMillis();

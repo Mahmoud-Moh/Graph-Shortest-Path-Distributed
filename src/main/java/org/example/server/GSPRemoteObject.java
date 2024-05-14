@@ -4,15 +4,17 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.example.server.graph.Graph;
 import org.example.server.metadata.ClientMetaData;
 
 public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInterface {
     ConcurrentHashMap<String, ClientMetaData> clients;
     int maxClients = 0;
     Long startTimeStamp;
+
+    Graph graph = null;
     
     // cache query outputs? (variant idea)
-
     public void report(String outputDirectory){
         //TODO: report total number of clients, maxClients, total number of completed requests, mean request processing time, etc. 
         //TODO: report for each client its own row in subscribedNodes in a table.
@@ -47,6 +49,7 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
 
     @Override
     public synchronized String processBatch(String nodeId, String batch) throws RemoteException {
+        System.out.println(batch);
         // If not subscribed, do not serve
         if((!clients.containsKey(nodeId)) || clients.get(nodeId).isUnSubscribed()){
             return "Call subscribe first";
@@ -66,5 +69,12 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
 
         // Return the batch output
         return "GSPRemoteObject.processBatch called";
+    }
+
+    @Override
+    public void x(String nodeId) throws RemoteException {
+        // TODO Auto-generated method stub
+    
+        throw new UnsupportedOperationException("Unimplemented method 'x'");
     }
 }

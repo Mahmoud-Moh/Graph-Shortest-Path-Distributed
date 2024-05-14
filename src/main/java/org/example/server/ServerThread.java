@@ -48,10 +48,16 @@ public class ServerThread extends Thread {
     @Override
     public void run() {
         // Read Graph from standard input.
-        graph = GraphReader.readGraph();
+        this.graph = GraphReader.readGraph();
+
+
+
+        gsp.graph = this.graph;
 
         // Signal the parent thread when ready.
         latch.countDown();
+
+        // ... listen
 
     }
 }
