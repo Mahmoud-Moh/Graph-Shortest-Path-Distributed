@@ -12,9 +12,15 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 public class ServerThread extends Thread {
+    private Graph graph;
+
     private CountDownLatch latch;   // To signal the parent thread (Start.java:main) when ready to handle requests.
     private int port = 49053;
-    private Graph graph;
+    GSPRemoteObject gsp;
+
+    public GSPRemoteObject getGsp() {
+        return gsp;
+    }
 
     public ServerThread(CountDownLatch latch) {
         this.latch = latch;
@@ -25,11 +31,11 @@ public class ServerThread extends Thread {
             port = Integer.parseInt(props.getProperty("GSP.rmiregistry.port"));
             
             // Create Object of the implementation of remote interface
-            GSPRemoteInterface obj = new GSPRemoteObject();
+            this.gsp = new GSPRemoteObject();
 
             // Bind the remote object with the name //rmi:://localhost:port/gsp
             LocateRegistry.createRegistry(port);
-            Naming.rebind(GetPropValues.getRemoteObjectReference(), obj);
+            Naming.rebind(GetPropValues.getRemoteObjectReference(), gsp);
         
         } catch (RemoteException e) {
             throw new RuntimeException(e);
@@ -47,7 +53,5 @@ public class ServerThread extends Thread {
         // Signal the parent thread when ready.
         latch.countDown();
 
-        // Accept requests.
-        // ...
     }
 }

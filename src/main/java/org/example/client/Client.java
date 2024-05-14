@@ -8,13 +8,26 @@ import java.io.IOException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.Properties;
 import java.util.Random;
 
 public class Client{
-    private static String logFilePath = "log.csv";
+    static String clientId;     // arg 0
+    static int seed;            // arg 1
+    
+    static int numOfRequests;
+    
+    static int sleepDurationLowBound;
+    static int sleepDurationHighBound;
+    
+    static int batchSizeMean;
+    static int batchSizeStdDev;
+
+    static int writePercentageMean;
+    static int writePercentageStdDev;
 
     public static GSPRemoteInterface setupStub(){
-        //Get Rmi Registery Server and port from system.properties
+        // Get Rmi Registery Server and port from system.properties
         try {
             return (GSPRemoteInterface) Naming.lookup(GetPropValues.getRemoteObjectReference());
         } catch (NotBoundException | IOException e) {
@@ -22,55 +35,84 @@ public class Client{
             return null;
         } 
     }
-    public static void main(String[] args) {
-        int maxRequests;
-        String clientId = "";
-        Random random = new Random();
 
-        int seed;
-        try{
+    private static void loadParams() throws IOException{
+        Properties params = GetPropValues.getClientParams();
+        numOfRequests = Integer.parseInt(params.getProperty("numOfRequests"));
+        sleepDurationLowBound = Integer.parseInt(params.getProperty("sleepDuration.low"));
+        sleepDurationHighBound = Integer.parseInt(params.getProperty("sleepDuration.high"));
+        
+        writePercentageMean = Integer.parseInt(params.getProperty("writePercentage.mean"));
+        writePercentageStdDev = Integer.parseInt(params.getProperty("writePercentage.stdDev"));
+
+        batchSizeMean = Integer.parseInt(params.getProperty("batchSize.mean"));
+        batchSizeStdDev = Integer.parseInt(params.getProperty("batchSize.stdDev"));
+    }
+
+    public static void main(String[] args) {
+        try {
             clientId = args[0];
-            maxRequests = Integer.parseInt(args[1]);
-        } catch(NumberFormatException e){
-            e.printStackTrace();
-            maxRequests = 10;
-        }
-        try{
             seed = Integer.parseInt(args[2]);
-        } catch(NumberFormatException e){
-            e.printStackTrace();
-            seed = random.nextInt();
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            System.err.println("Invalid arguments. Usage: java Main <clientId> <seed>");
+            System.exit(2);
+            return;
         }
+
+        try {
+            loadParams();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // log path
+        final String logFilePath = "log" + clientId + ".csv";
         
-        
-        logFilePath = "log" + clientId + ".csv";
+        Random random = new Random(seed*10L);
+
         // Initialize the stub
         GSPRemoteInterface stub = setupStub();
         if(stub==null){
-            System.exit(0);
+            System.exit(3);
+        }
+        
+        // Subscribe to the server
+        try {
+            boolean success = stub.subscribe("node"+clientId);
+            if(!success){
+                System.err.println("Failed to subscribe to the server");
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+            System.exit(4);
+            return;
         }
         
         // Initialize the batch generator
-        BatchGenerator batchGenerator = new BatchGenerator(seed, 30, 10);
+        BatchGenerator batchGenerator = new BatchGenerator(seed, writePercentageMean, writePercentageStdDev);
 
         // Initialize the batch size random variable
-        NormalRandomVariable batchSizeVariable = new NormalRandomVariable(random, 10, 5);
+        NormalRandomVariable batchSizeVariable = new NormalRandomVariable(random, batchSizeMean, batchSizeStdDev);
 
         // Initialize batch index
         int i = 0;
-        while(i < maxRequests){
+
+        while(i < numOfRequests){
             // determine the size for the next batch
-            int batchSize = 10 + (int) Math.min(Math.max(batchSizeVariable.nextValue(), 0), 30);
+            int batchSize = (int) Math.min(Math.max(batchSizeVariable.nextValue(), 10), 40);
             
             // generate the batch
             String batch = batchGenerator.generateBatch(batchSize);
+
+            int sleepDuration = random.nextInt(sleepDurationHighBound - sleepDurationLowBound + 1) + sleepDurationLowBound;
+
 
             try {
                 // Record timestamp before RMI call
                 long startTimestamp = System.currentTimeMillis();
                 
                 // Perform RMI call
-                String batchOutput = stub.processBatch(batch);
+                String batchOutput = stub.processBatch("node"+clientId, batch);
                 
                 // Record timestamp after RMI call
                 long endTimestamp = System.currentTimeMillis();
@@ -79,22 +121,27 @@ public class Client{
                 long latency = endTimestamp - startTimestamp;
  
                 // Log the generated batch, returned batchOutput, timestamps and latency
-                ClientLogger.log(logFilePath, i, startTimestamp, endTimestamp, latency, batch, batchOutput);
+                ClientLogger.log(logFilePath, i, startTimestamp, endTimestamp, latency, batch, batchOutput, batchGenerator.lastBatchWritePercentage,batchGenerator.lastBatchAddOpsCount, batchGenerator.lastBatchDeleteOpsCount,batchGenerator.lastBatchQueryOpsCount, batchSize, sleepDuration);
 
             } catch (RemoteException e) {
                 e.printStackTrace();
-                ClientLogger.log(logFilePath, i, -1, -1, -1, batch, e.getMessage());
+                ClientLogger.log(logFilePath, i, -1, -1, -1, batch, e.getMessage(),batchGenerator.lastBatchWritePercentage,batchGenerator.lastBatchAddOpsCount, batchGenerator.lastBatchDeleteOpsCount,batchGenerator.lastBatchQueryOpsCount, batchSize, sleepDuration);
             }   
 
             // Sleep for some random time
             try {
-                int delay = random.nextInt(10000); // Random delay between 0 to 10000 ms
-                Thread.sleep(delay);
+                Thread.sleep(sleepDuration);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
             i++;
+        }
+        // Unsubscribe to the server
+        try {
+            stub.unSubscribe("node"+clientId);
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 }

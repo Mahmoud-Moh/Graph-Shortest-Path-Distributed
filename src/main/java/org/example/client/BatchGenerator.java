@@ -7,6 +7,12 @@ import java.util.Random;
 public class BatchGenerator {    
     Random random;
     NormalRandomVariable writePercentageVariable; 
+    
+    double lastBatchWritePercentage = -1;
+    
+    int lastBatchAddOpsCount;
+    int lastBatchDeleteOpsCount;
+    int lastBatchQueryOpsCount;
 
     public void adjustWritePercentageVariable(double newMean, double newDeviation){
         writePercentageVariable.setMean(newMean);
@@ -25,16 +31,23 @@ public class BatchGenerator {
     public String generateBatch(int numOfOperations) {
         return generateBatch(numOfOperations, 50);
     }
+    
     public String generateBatch(int numOfOperations, double addOfWritePercentage) {
         double writePercentage = Math.min(Math.max(writePercentageVariable.nextValue(), 0), 100);
+        lastBatchWritePercentage = writePercentage;
         double addPercentage = (addOfWritePercentage / 100) * writePercentage;
         return generateBatch(numOfOperations, addPercentage, writePercentage-addPercentage);
     }
 
 
+
+
+
     public String generateBatch(int numOfOperations, double percentageOfAdd, double percentageOfDelete) {
         StringBuilder batchString = new StringBuilder();
-        
+        int addOps = 0;
+        int delOps = 0;
+        int queryOps = 0;
         while (numOfOperations > 0) {
             char operationType;
 
@@ -42,10 +55,13 @@ public class BatchGenerator {
             int randomNumber = random.nextInt(100);
             if (randomNumber < percentageOfAdd) {
                 operationType = 'A';
+                addOps++;
             } else if (randomNumber < percentageOfAdd + percentageOfDelete) {
                 operationType = 'D';
+                delOps++;
             } else {
                 operationType = 'Q';
+                queryOps++;
             }
             
             // generate two random positive integer node IDs
@@ -57,6 +73,10 @@ public class BatchGenerator {
             
             numOfOperations--;
         }
+
+        lastBatchAddOpsCount = addOps;
+        lastBatchDeleteOpsCount = delOps;
+        lastBatchQueryOpsCount = queryOps;
 
         batchString.append("F");
 
