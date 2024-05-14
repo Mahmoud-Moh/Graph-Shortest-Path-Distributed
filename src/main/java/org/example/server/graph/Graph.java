@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Graph {
-    int numOfNodes;
-    HashMap<Integer, HashSet<Integer>> adj;
+    public int numOfNodes;
+    public HashMap<Integer, HashSet<Integer>> adj;
 
     public Graph() {
         numOfNodes = 0;
