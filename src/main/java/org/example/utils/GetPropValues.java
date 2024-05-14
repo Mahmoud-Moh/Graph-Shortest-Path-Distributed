@@ -16,12 +16,22 @@ public class GetPropValues{
         }
         return prop;
     }
-
+    
     public static String getRemoteObjectReference() throws IOException {
         Properties props = GetPropValues.getPropValues();
         String server = props.getProperty("GSP.server");
         String port = props.getProperty("GSP.rmiregistry.port");
         return "rmi://" + server + ":" + port + "/gsp";
     }
-
+    
+    public static Properties getClientParams() throws IOException {
+        Properties prop = new Properties();
+        InputStream inputStream = GetPropValues.class.getClassLoader().getResourceAsStream("clients.properties");
+        if(inputStream != null){
+            prop.load(inputStream);
+        }else{
+            throw new FileNotFoundException("property file \'clients.properties\' not found in the classpath");
+        }
+        return prop;
+    }
 }

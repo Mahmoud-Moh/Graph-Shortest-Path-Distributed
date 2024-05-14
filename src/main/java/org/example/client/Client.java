@@ -8,13 +8,26 @@ import java.io.IOException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.Properties;
 import java.util.Random;
 
 public class Client{
-    private static String logFilePath = "log.csv";
+    static String clientId;     // arg 0
+    static int seed;            // arg 1
+    
+    static int numOfRequests;
+    
+    static int sleepDurationLowBound;
+    static int sleepDurationHighBound;
+    
+    static int batchSizeMean;
+    static int batchSizeStdDev;
+
+    static int writePercentageMean;
+    static int writePercentageStdDev;
 
     public static GSPRemoteInterface setupStub(){
-        //Get Rmi Registery Server and port from system.properties
+        // Get Rmi Registery Server and port from system.properties
         try {
             return (GSPRemoteInterface) Naming.lookup(GetPropValues.getRemoteObjectReference());
         } catch (NotBoundException | IOException e) {
@@ -22,45 +35,40 @@ public class Client{
             return null;
         } 
     }
-    public static void main(String[] args) {
-        int numOfRequests = 10;
-        String clientId = "";
-        int seed;
-        boolean fixedSleepMode = false;
-        int sleepDuration;
 
+    private static void loadParams() throws IOException{
+        Properties params = GetPropValues.getClientParams();
+        numOfRequests = Integer.parseInt(params.getProperty("numOfRequests"));
+        sleepDurationLowBound = Integer.parseInt(params.getProperty("sleepDuration.low"));
+        sleepDurationHighBound = Integer.parseInt(params.getProperty("sleepDuration.high"));
+        
+        writePercentageMean = Integer.parseInt(params.getProperty("writePercentage.mean"));
+        writePercentageStdDev = Integer.parseInt(params.getProperty("writePercentage.stdDev"));
+
+        batchSizeMean = Integer.parseInt(params.getProperty("batchSize.mean"));
+        batchSizeStdDev = Integer.parseInt(params.getProperty("batchSize.stdDev"));
+    }
+
+    public static void main(String[] args) {
         try {
             clientId = args[0];
-            numOfRequests = Integer.parseInt(args[1]);
-        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            System.err.println("Invalid arguments. Usage: java Main <clientId> <numOfRequests> [<seed> <sleepDuration>]");
-            numOfRequests = 10;
-        }
-
-        try{
             seed = Integer.parseInt(args[2]);
-        } catch(NumberFormatException | ArrayIndexOutOfBoundsException e){
-            System.err.println("Invalid arguments. Usage: java Main <clientId> <numOfRequests> [<seed> <sleepDuration>]");
-            seed = 42;
-        }
-
-        Random random = new Random(seed*10L);
-
-        try{
-            sleepDuration = Integer.parseInt(args[3]);
-            fixedSleepMode = true;
-        } catch(NumberFormatException e){
-            System.err.println("Invalid arguments. Usage: java Main <clientId> <numOfRequests> [<seed> <sleepDuration>]");
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            System.err.println("Invalid arguments. Usage: java Main <clientId> <seed>");
             System.exit(2);
             return;
-        } catch(ArrayIndexOutOfBoundsException e){
-            fixedSleepMode = false;
-            sleepDuration = random.nextInt(10000);
         }
 
-        
+        try {
+            loadParams();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        logFilePath = "log" + clientId + ".csv";
+        // log path
+        final String logFilePath = "log" + clientId + ".csv";
+        
+        Random random = new Random(seed*10L);
 
         // Initialize the stub
         GSPRemoteInterface stub = setupStub();
@@ -70,30 +78,34 @@ public class Client{
         
         // Subscribe to the server
         try {
-            stub.subscribe("node"+clientId);
+            boolean success = stub.subscribe("node"+clientId);
+            if(!success){
+                System.err.println("Failed to subscribe to the server");
+            }
         } catch (RemoteException e) {
             e.printStackTrace();
+            System.exit(4);
+            return;
         }
         
         // Initialize the batch generator
-        BatchGenerator batchGenerator = new BatchGenerator(seed, 30, 10);
+        BatchGenerator batchGenerator = new BatchGenerator(seed, writePercentageMean, writePercentageStdDev);
 
         // Initialize the batch size random variable
-        NormalRandomVariable batchSizeVariable = new NormalRandomVariable(random, 10, 5);
+        NormalRandomVariable batchSizeVariable = new NormalRandomVariable(random, batchSizeMean, batchSizeStdDev);
 
         // Initialize batch index
         int i = 0;
 
         while(i < numOfRequests){
             // determine the size for the next batch
-            int batchSize = 10 + (int) Math.min(Math.max(batchSizeVariable.nextValue(), 0), 30);
+            int batchSize = (int) Math.min(Math.max(batchSizeVariable.nextValue(), 10), 40);
             
             // generate the batch
             String batch = batchGenerator.generateBatch(batchSize);
 
-            if(!fixedSleepMode){
-                sleepDuration = random.nextInt(10000);
-            }
+            int sleepDuration = random.nextInt(sleepDurationHighBound - sleepDurationLowBound + 1) + sleepDurationLowBound;
+
 
             try {
                 // Record timestamp before RMI call
@@ -109,11 +121,11 @@ public class Client{
                 long latency = endTimestamp - startTimestamp;
  
                 // Log the generated batch, returned batchOutput, timestamps and latency
-                ClientLogger.log(logFilePath, i, startTimestamp, endTimestamp, latency, batch, batchOutput, batchGenerator.mostRecentWritePercentage, batchSize, sleepDuration);
+                ClientLogger.log(logFilePath, i, startTimestamp, endTimestamp, latency, batch, batchOutput, batchGenerator.lastBatchWritePercentage,batchGenerator.lastBatchAddOpsCount, batchGenerator.lastBatchDeleteOpsCount,batchGenerator.lastBatchQueryOpsCount, batchSize, sleepDuration);
 
             } catch (RemoteException e) {
                 e.printStackTrace();
-                ClientLogger.log(logFilePath, i, -1, -1, -1, batch, e.getMessage(),batchGenerator.mostRecentWritePercentage, batchSize, sleepDuration);
+                ClientLogger.log(logFilePath, i, -1, -1, -1, batch, e.getMessage(),batchGenerator.lastBatchWritePercentage,batchGenerator.lastBatchAddOpsCount, batchGenerator.lastBatchDeleteOpsCount,batchGenerator.lastBatchQueryOpsCount, batchSize, sleepDuration);
             }   
 
             // Sleep for some random time

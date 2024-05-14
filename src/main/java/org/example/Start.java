@@ -1,8 +1,10 @@
 package org.example;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
@@ -47,7 +49,7 @@ public class Start {
             int seed = 42;
             for (int i = 0; i < clientIds.length; i++) {
                 // Command to run the client process
-                String[] command = {"java", "-cp", CLASSPATH, "org.example.client.Client", String.valueOf(i), "3", String.valueOf(seed)};
+                String[] command = {"java", "-cp", CLASSPATH, "org.example.client.Client", clientIds[i], "3", String.valueOf(seed)};
 
                 // Create a ProcessBuilder with the command
                 ProcessBuilder pb = new ProcessBuilder(command);
@@ -70,6 +72,17 @@ public class Start {
         
         GSPRemoteObject gsp = serverThread.getGsp();
         gsp.report(SERVER_LOG_DIRECTORY);
+        
+        
+        // Save the used client parameters 
+        String filePath = "recentParameters.properties";
+    
+        try (OutputStream outputStream = new FileOutputStream(filePath)) {
+            GetPropValues.getClientParams().store(outputStream, "Client Parameters");
+            System.out.println("Parameters saved to " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error saving properties to file: " + e.getMessage());
+        }
 
         serverThread.join(); // Wait for the server thread
     }
