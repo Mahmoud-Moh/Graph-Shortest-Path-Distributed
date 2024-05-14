@@ -1,9 +1,6 @@
 package org.example.server.graph;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Graph {
     public int numOfNodes;
@@ -70,5 +67,27 @@ public class Graph {
     // get all neighbors of a node, returns null if node doesn't exist in the graph.
     public Set<Integer> getNeighbors(int node) {
         return adj.getOrDefault(node, null);
+    }
+
+    // Method to reverse the graph
+    public Graph reverseGraph() {
+        Graph reversedGraph = new Graph();
+
+        // Iterate through each node and its neighbors in the original graph
+        for (Map.Entry<Integer, HashSet<Integer>> entry : adj.entrySet()) {
+            Integer node = entry.getKey();
+            HashSet<Integer> neighbors = entry.getValue();
+
+            // Ensure the node exists in the reversed graph
+            reversedGraph.addNode(node);
+
+            // For each neighbor, add the reversed edge to the reversed graph
+            for (Integer neighbor : neighbors) {
+                reversedGraph.addNode(neighbor); // Ensure the neighbor exists
+                reversedGraph.addEdge(neighbor, node); // Reverse the edge direction
+            }
+        }
+
+        return reversedGraph;
     }
 }
