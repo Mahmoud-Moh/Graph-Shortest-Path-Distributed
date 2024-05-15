@@ -48,7 +48,6 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     }
 
     
-
     @Override
     public synchronized String processBatch(String nodeId, String batch) throws RemoteException {
        
@@ -63,7 +62,7 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         
         System.out.println("Server started a batch");
 		StringBuilder result = new StringBuilder();
-		String[] batchLines=batch.split("\n");
+        String[] batchLines = batch.split("\\s*\r?\n\\s*");
 		for(String line : batchLines){
 			proccessBatchLine(nodeId, line, result);
 		}
@@ -73,6 +72,8 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         
         Long processingEndTimeStamp = System.currentTimeMillis();
         Long processingTime = processingEndTimeStamp - processingStartTimeStamp;
+
+
 
         // For reporting
         clients.get(nodeId).registerProcessingTime(processingTime);
@@ -88,6 +89,7 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         if (queryType == 'F') {
             return ;
         }
+
         int u = Integer.parseInt(operation[1]);
         int v = Integer.parseInt(operation[2]);
 
@@ -101,7 +103,7 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         }
         else{
             int out = graph.shortestPath(u, v, "BFS");
-            System.out.println("Shortest path between " + u + " and " + v + " usign " + "BFS" + " is: " + out);
+            System.out.println("Shortest path between " + u + " and " + v + " using " + "BFS" + " is: " + out);
             result.append(out);
             result.append("\n");
         }
