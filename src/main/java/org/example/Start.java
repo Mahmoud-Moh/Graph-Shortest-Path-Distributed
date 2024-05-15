@@ -54,7 +54,7 @@ public class Start {
                 // Create a ProcessBuilder with the command
                 ProcessBuilder pb = new ProcessBuilder(command);
 
-                // Start the process and store reference to it
+                // Start the process and store a reference to it
                 processes[i] = pb.start();
 
                 seed++;

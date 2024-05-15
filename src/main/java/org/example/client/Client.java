@@ -5,6 +5,9 @@ import org.example.server.GSPRemoteInterface;
 import org.example.utils.GetPropValues;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -25,6 +28,8 @@ public class Client{
 
     static int writePercentageMean;
     static int writePercentageStdDev;
+
+    static String logDirectory;
 
     public static GSPRemoteInterface setupStub(){
         // Get Rmi Registery Server and port from system.properties
@@ -47,6 +52,8 @@ public class Client{
 
         batchSizeMean = Integer.parseInt(params.getProperty("batchSize.mean"));
         batchSizeStdDev = Integer.parseInt(params.getProperty("batchSize.stdDev"));
+        
+        logDirectory = params.getProperty("logDirectory");
     }
 
     public static void main(String[] args) {
@@ -59,15 +66,23 @@ public class Client{
             return;
         }
 
+        // clientId = "7";
+        // seed = 42;
+
+
         try {
             loadParams();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        // log path
-        final String logFilePath = "log" + clientId + ".csv";
+
+        String logFilePath = Paths.get(logDirectory,  "log" + clientId + ".csv").toString();
         
+        ensureDirectoryExists(logDirectory);
+
+        deleteFileIfExists(logFilePath);
+
         Random random = new Random(seed*10L);
 
         // Initialize the stub
@@ -143,4 +158,31 @@ public class Client{
             e.printStackTrace();
         }
     }
+
+    public static void deleteFileIfExists(String filePath) {
+        Path path = Paths.get(filePath);
+        try {
+            if (Files.exists(path)) {
+                Files.delete(path);
+                System.out.println("File deleted: " + filePath);
+            }
+        } catch (IOException e) {
+            System.err.println("Error deleting file: " + e.getMessage());
+        }
+    }
+
+    public static void ensureDirectoryExists(String directoryPath) {
+        Path path = Paths.get(directoryPath);
+        try {
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+                System.out.println("Directory created: " + directoryPath);
+            } else {
+                System.out.println("Directory already exists: " + directoryPath);
+            }
+        } catch (IOException e) {
+            System.err.println("Error creating directory: " + e.getMessage());
+        }
+    }
+    
 }

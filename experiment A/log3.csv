@@ -1,0 +1,2 @@
+Index, StartTimestamp, EndTimestamp, ResponseTime, Batch, BatchOutput, writePercentage, addOps, deleteOps, queryOps, batchSize, timeSleptAfterThisBatch
+0, 1715801288030, 1715801288113, 83, Q 2 2 & Q 5 4 & D 10 1 & Q 1 7 & A 6 1 & Q 3 2 & Q 5 9 & D 8 1 & Q 2 3 & D 2 3 & Q 4 10 & Q 8 1 & Q 2 3 & Q 4 2 & Q 4 3 & Q 10 1 & Q 3 3 & A 7 6 & Q 4 2 & Q 4 5 & A 2 4 & F, GSPRemoteObject.processBatch called, 30.0, 3, 3, 15, 21, 8092
