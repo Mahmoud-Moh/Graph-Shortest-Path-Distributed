@@ -12,16 +12,21 @@ public class ShortestPathSolver {
 
     Graph graph, reversed_graph;
     int numOfNodes;
-    List<List<Integer>> dict = new ArrayList<>();
+    List<List<Integer>> dict;
 
     public ShortestPathSolver(Graph graph){
         this.graph = graph;
         this.numOfNodes = graph.numOfNodes;
         this.reversed_graph = graph.reverseGraph();
+        this.dict = new ArrayList<>(numOfNodes + 1);
+        for(int i=0; i < numOfNodes + 1; i++) {
+            dict.add(new ArrayList<>(Collections.nCopies(numOfNodes + 1, -1))); // Initial fill with -1 (or any default value)
+            }
         generateDictionary();
     }
 
     public int query(int fromNode, int toNode){
+        System.out.println(dict.size());
         return dict.get(fromNode).get(toNode);
     }
 
@@ -58,9 +63,9 @@ public class ShortestPathSolver {
         //Costly process, this code should be parallelized per node
         //Assumption graph size < 256 (Number of threads per JVM)
         HashMap<Integer, HashSet<Integer>> adj = graph.adj;
-        for(int i=0; i < numOfNodes; i++){
-            dict.add(new ArrayList<>(numOfNodes));
-            for(int j=0; j < numOfNodes; j++){
+        for(int i=1; i <= numOfNodes; i++){
+            //dict.set(i, new ArrayList<>(numOfNodes + 1)) ;
+            for(int j=1; j <= numOfNodes; j++){
                 int distance = bfs(adj, i, j);
                 dict.get(i).set(j, distance);
             }

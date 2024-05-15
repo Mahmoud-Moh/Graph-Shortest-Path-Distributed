@@ -113,7 +113,6 @@ public class Client{
                 
                 // Perform RMI call
                 String batchOutput = stub.processBatch("node"+clientId, batch);
-                
                 // Record timestamp after RMI call
                 long endTimestamp = System.currentTimeMillis();
 

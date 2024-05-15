@@ -16,13 +16,13 @@ import org.example.utils.GetPropValues;
 public class Start {
             
     // Specify the classpath
-    static final String CLASSPATH = "target\\classes";
+    static final String CLASSPATH = "target/classes";
     private static final String SERVER_LOG_DIRECTORY = "";
             
     public static void main(String[] args) throws IOException, InterruptedException {
         // a signaling mechanism to get notified when the server thread is ready to recieve requests
         CountDownLatch latch = new CountDownLatch(1);
-        
+        System.out.println(CLASSPATH);
         // Create the server thread
         ServerThread serverThread = new ServerThread(latch);
         
@@ -39,34 +39,34 @@ public class Start {
             Properties props = GetPropValues.getPropValues();
             int numOfClients = Integer.parseInt(props.getProperty("GSP.numberOfnodes"));
             
-            Process[] processes = new Process[numOfClients];
-            String[] clientIds = new String[numOfClients];
+//            Process[] processes = new Process[numOfClients];
+//            String[] clientIds = new String[numOfClients];
 
-            for(int i=0; i< numOfClients; i++){
-                clientIds[i] = props.getProperty("GSP.node"+i);
-            }
+//            for(int i=0; i< numOfClients; i++){
+//                clientIds[i] = props.getProperty("GSP.node"+i);
+//            }
 
-            int seed = 42;
-            for (int i = 0; i < clientIds.length; i++) {
-                // Command to run the client process
-                String[] command = {"java", "-cp", CLASSPATH, "org.example.client.Client", clientIds[i], "3", String.valueOf(seed)};
-
-                // Create a ProcessBuilder with the command
-                ProcessBuilder pb = new ProcessBuilder(command);
-
-                // Start the process and store reference to it
-                processes[i] = pb.start();
-
-                seed++;
-            }
+//            int seed = 42;
+//            for (int i = 0; i < clientIds.length; i++) {
+//                // Command to run the client process
+//                String[] command = {"java", "-cp", CLASSPATH, "org.example.client.Client", clientIds[i], "3", String.valueOf(seed)};
+//
+//                // Create a ProcessBuilder with the command
+//                ProcessBuilder pb = new ProcessBuilder(command);
+//
+//                // Start the process and store reference to it
+//                processes[i] = pb.start();
+//
+//                seed++;
+//            }
 
             // Join on the processes
-            for (Process process : processes) {
-                int exitCode = process.waitFor();
-                System.out.println("Exited with error code " + exitCode);
-            }
+//            for (Process process : processes) {
+//                int exitCode = process.waitFor();
+//                System.out.println("Exited with error code " + exitCode);
+//            }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         

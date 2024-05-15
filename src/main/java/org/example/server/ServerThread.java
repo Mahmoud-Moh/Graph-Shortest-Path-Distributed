@@ -1,6 +1,7 @@
 package org.example.server;
 
 import org.example.server.graph.Graph;
+import org.example.server.graph.solvers.ShortestPathSolver;
 import org.example.utils.GetPropValues;
 
 import java.io.IOException;
@@ -49,7 +50,8 @@ public class ServerThread extends Thread {
     public void run() {
         // Read Graph from standard input.
         graph = GraphReader.readGraph();
-
+        ShortestPathSolver shortestPathSolver = new ShortestPathSolver(graph);
+        gsp.setShortestPathSolver(shortestPathSolver);
         // Signal the parent thread when ready.
         latch.countDown();
 
