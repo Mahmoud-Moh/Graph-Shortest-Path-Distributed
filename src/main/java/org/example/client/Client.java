@@ -133,23 +133,27 @@ public class Client{
 
                 // Calculate latency
                 long latency = endTimestamp - startTimestamp;
- 
-                // Log the generated batch, returned batchOutput, timestamps and latency
-                ClientLogger.log(logFilePath, i, startTimestamp, endTimestamp, latency, batch, batchOutput, batchGenerator.lastBatchWritePercentage,batchGenerator.lastBatchAddOpsCount, batchGenerator.lastBatchDeleteOpsCount,batchGenerator.lastBatchQueryOpsCount, batchSize, sleepDuration);
 
-            } catch (RemoteException e) {
+                // Log the generated batch, returned batchOutput, timestamps and latency
+                ClientLogger.log(logFilePath, i, startTimestamp, endTimestamp, latency,
+                                batch, batchOutput,
+                                batchGenerator.lastBatchWritePercentage,
+                                batchGenerator.lastBatchAddOpsCount,
+                                batchGenerator.lastBatchDeleteOpsCount,
+                                batchGenerator.lastBatchQueryOpsCount,
+                                batchSize,
+                                sleepDuration
+                                );
+
+                i++;
+                
+                // Sleep for some time
+                Thread.sleep(Math.max(sleepDuration-latency, 0));
+
+            } catch (RemoteException | InterruptedException e) {
                 e.printStackTrace();
                 ClientLogger.log(logFilePath, i, -1, -1, -1, batch, e.getMessage(),batchGenerator.lastBatchWritePercentage,batchGenerator.lastBatchAddOpsCount, batchGenerator.lastBatchDeleteOpsCount,batchGenerator.lastBatchQueryOpsCount, batchSize, sleepDuration);
             }   
-
-            // Sleep for some random time
-            try {
-                Thread.sleep(sleepDuration);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            i++;
         }
         // Unsubscribe to the server
         try {

@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
@@ -74,8 +75,8 @@ public class Start {
         gsp.report(SERVER_LOG_DIRECTORY);
         
         
-        // Save the used client parameters 
-        String filePath = "recentParameters.properties";
+        // Save the used parameters 
+        String filePath = Paths.get(GetPropValues.getClientParams().getProperty("logDirectory"), "parameters.properties").toString();
     
         try (OutputStream outputStream = new FileOutputStream(filePath)) {
             GetPropValues.getClientParams().store(outputStream, "Client Parameters");
