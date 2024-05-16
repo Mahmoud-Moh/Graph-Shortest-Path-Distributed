@@ -50,6 +50,7 @@ public class ServerThread extends Thread {
     public void run() {
         // Read Graph from standard input.
         graph = GraphReader.readGraph();
+        System.out.println(graph.numOfNodes);
         ShortestPathSolver shortestPathSolver = new ShortestPathSolver(graph);
         gsp.setShortestPathSolver(shortestPathSolver);
         // Signal the parent thread when ready.

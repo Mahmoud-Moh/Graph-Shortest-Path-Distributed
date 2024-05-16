@@ -35,7 +35,7 @@ public class ShortestPathSolver {
         reversed_graph.addEdge(toNode, fromNode);
         if(dict.get(fromNode).get(toNode) != 1){
             dict.get(fromNode).set(toNode, 1);
-            for(int i=0; i<numOfNodes && i != fromNode; i++){
+            for(int i=0; i<numOfNodes && i != fromNode && i != toNode; i++){
                 int distance_to_from = dict.get(i).get(fromNode);
                 int distance_to_to = dict.get(i).get(toNode);
                 if(distance_to_from != -1){
