@@ -47,13 +47,22 @@ public class ServerThread extends Thread {
 
     @Override
     public void run() {
-        // Read Graph from standard input.
-        this.graph = GraphReader.readGraph();
-        
+        // Read Initial Graph from standard input or a file.
 
+        // this.graph = GraphReader.readGraphFromStdInput();
+        
+        try {
+            this.graph = GraphReader.readGraphFromFile(GetPropValues.getPropValues().getProperty("GSP.initialGraph"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(3);
+            return;
+        }
 
         gsp.graph = this.graph;
 
+        System.out.println("R");
+        
         // Signal the parent thread when ready.
         latch.countDown();
 
