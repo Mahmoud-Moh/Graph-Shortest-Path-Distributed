@@ -1,6 +1,7 @@
 package org.example.server;
 
 import org.example.server.graph.Graph;
+import org.example.server.graph.solvers.ShortestPathSolver;
 import org.example.utils.GetPropValues;
 
 import java.io.IOException;
@@ -24,25 +25,25 @@ public class ServerThread extends Thread {
 
     public ServerThread(CountDownLatch latch) {
         this.latch = latch;
-        
+
         try {
             // Get Rmi Registery Server and port from system.properties
             Properties props = GetPropValues.getPropValues();
             port = Integer.parseInt(props.getProperty("GSP.rmiregistry.port"));
-            
+
             // Create Object of the implementation of remote interface
             this.gsp = new GSPRemoteObject();
 
             // Bind the remote object with the name //rmi:://localhost:port/gsp
             LocateRegistry.createRegistry(port);
             Naming.rebind(GetPropValues.getRemoteObjectReference(), gsp);
-        
+
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
+
     }
 
     @Override
@@ -50,7 +51,7 @@ public class ServerThread extends Thread {
         // Read Initial Graph from standard input or a file.
 
         // this.graph = GraphReader.readGraphFromStdInput();
-        
+
         try {
             this.graph = GraphReader.readGraphFromFile(GetPropValues.getPropValues().getProperty("GSP.initialGraph"));
         } catch (IOException e) {
@@ -60,9 +61,10 @@ public class ServerThread extends Thread {
         }
 
         gsp.graph = this.graph;
-
+        ShortestPathSolver shortestPathSolver = new ShortestPathSolver(graph);
+        gsp.shortestPathSolver = shortestPathSolver;
         System.out.println("R");
-        
+
         // Signal the parent thread when ready.
         latch.countDown();
 

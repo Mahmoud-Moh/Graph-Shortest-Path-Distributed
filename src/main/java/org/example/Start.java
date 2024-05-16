@@ -15,31 +15,31 @@ import org.example.server.ServerThread;
 import org.example.utils.GetPropValues;
 
 public class Start {
-            
+
     // Specify the classpath
-    static final String CLASSPATH = "target\\classes";
+    static final String CLASSPATH = System.getProperty("os.name").toLowerCase().contains("linux") ? "target/classes" : "target\\classes";
     private static final String SERVER_LOG_DIRECTORY = "";
-            
+
     public static void main(String[] args) throws IOException, InterruptedException {
         // a signaling mechanism to get notified when the server thread is ready to recieve requests
         CountDownLatch latch = new CountDownLatch(1);
-        
+
         // Create the server thread
         ServerThread serverThread = new ServerThread(latch);
-        
+
         // Start the server thread (it should start reading the graph)
         serverThread.start();
-        
+
         latch.await(); // Wait for server's signal
 
         System.out.println("Received signal from the server thread, starting clients...");
-        
-        // Start the client processes 
+
+        // Start the client processes
         try{
-            
+
             Properties props = GetPropValues.getPropValues();
             int numOfClients = Integer.parseInt(props.getProperty("GSP.numberOfnodes"));
-            
+
             Process[] processes = new Process[numOfClients];
             String[] clientIds = new String[numOfClients];
 
@@ -67,17 +67,17 @@ public class Start {
                 System.out.println("Exited with error code " + exitCode);
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         GSPRemoteObject gsp = serverThread.getGsp();
         gsp.report(SERVER_LOG_DIRECTORY);
-        
-        
+
+
         // Save the used parameters 
         String filePath = Paths.get(GetPropValues.getClientParams().getProperty("logDirectory"), "parameters.properties").toString();
-    
+
         try (OutputStream outputStream = new FileOutputStream(filePath)) {
             GetPropValues.getClientParams().store(outputStream, "Client Parameters");
             System.out.println("Parameters saved to " + filePath);

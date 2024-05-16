@@ -1,15 +1,16 @@
 package org.example.server.graph;
-
+import java.util.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+
 public class Graph {
     private static Graph instance;
-    private int numOfNodes;
-    private HashMap<Integer, HashSet<Integer>> adj;
+    public int numOfNodes;
+    public HashMap<Integer, HashSet<Integer>> adj;
 
     // Private constructor to prevent instantiation
     private Graph() {
@@ -87,7 +88,28 @@ public class Graph {
         return adj.getOrDefault(node, null);
     }
 
-    
+    // Method to reverse the graph
+    public Graph reverseGraph() {
+        Graph reversedGraph = new Graph();
+
+        // Iterate through each node and its neighbors in the original graph
+        for (Map.Entry<Integer, HashSet<Integer>> entry : adj.entrySet()) {
+            Integer node = entry.getKey();
+            HashSet<Integer> neighbors = entry.getValue();
+
+            // Ensure the node exists in the reversed graph
+            reversedGraph.addNode(node);
+
+            // For each neighbor, add the reversed edge to the reversed graph
+            for (Integer neighbor : neighbors) {
+                reversedGraph.addNode(neighbor); // Ensure the neighbor exists
+                reversedGraph.addEdge(neighbor, node); // Reverse the edge direction
+            }
+        }
+
+        return reversedGraph;
+    }
+
     public int shortestPath(int u, int v , String algorithm) {
         if (algorithm.equals("BFS") ) {
             return BFS(u, v);
@@ -96,22 +118,22 @@ public class Graph {
         }
         return 0;
     }
-    
+
     private int BFS(int u, int v){
         if (u == v) return 0;
         HashMap<Integer, Integer> visited= new HashMap<>();
         Queue<Integer> queue = new LinkedList<>();
-        
+
         visited.put(u, 0);
         queue.add(u);
-        
+
         while (!queue.isEmpty()) {
             int current= queue.remove();
             if (adj.containsKey(current)) {
                 for (int neighbor : adj.get(current)) {
                     if (!visited.containsKey(neighbor)) {
                         if(neighbor == v)
-                            return visited.get(current) + 1;  
+                            return visited.get(current) + 1;
                         visited.put(neighbor, visited.get(current) + 1);
                         queue.add(neighbor);
                     }
@@ -126,21 +148,21 @@ public class Graph {
         // Queue for BFS from start and end nodes
         Queue<Integer> startQueue = new LinkedList<>();
         Queue<Integer> endQueue = new LinkedList<>();
-        
+
         // Visited sets for start and end BFS
         HashSet<Integer> startVisited = new HashSet<>();
         HashSet<Integer> endVisited = new HashSet<>();
-        
+
         // Initialize start and end queues and visited sets
         startQueue.add(u);
         endQueue.add(v);
         startVisited.add(u);
         endVisited.add(v);
-        
+
         // Steps from start and end
         int stepsStart = 0;
         int stepsEnd = 0;
-        
+
         // Start BFS from both start and end nodes
         while (!startQueue.isEmpty() && !endQueue.isEmpty()) {
             // Perform BFS from start node
@@ -158,7 +180,7 @@ public class Graph {
                     return stepsStart + stepsEnd - 1; // Subtract 1 because we count the meeting node twice
                 }
             }
-            
+
             // Perform BFS from end node
             stepsEnd++;
             size = endQueue.size();
@@ -175,9 +197,7 @@ public class Graph {
                 }
             }
         }
-        
+
         return -1;
     }
-
-
 }

@@ -71,17 +71,15 @@ public class Client{
     }
 
     public static void main(String[] args) {
-        // try {
-        //     clientId = args[0];
-        //     seed = Integer.parseInt(args[2]);
-        // } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-        //     System.err.println("Invalid arguments. Usage: java Main <clientId> <seed>");
-        //     System.exit(2);
-        //     return;
-        // }
+         try {
+             clientId = args[0];
+             seed = Integer.parseInt(args[2]);
+         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+             System.err.println("Invalid arguments. Usage: java Main <clientId> <seed>");
+             System.exit(2);
+             return;
+         }
 
-        clientId = "0";
-        seed = 42;
 
         try {
             loadParams();
@@ -157,7 +155,6 @@ public class Client{
                 
                 // Perform RMI call
                 String batchOutput = stub.processBatch("node"+clientId, batch);
-                
                 // Record timestamp after RMI call
                 long endTimestamp = System.currentTimeMillis();
 
