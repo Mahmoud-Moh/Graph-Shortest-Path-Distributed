@@ -13,6 +13,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Properties;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 public class Client{
     static String clientId;     // arg 0
@@ -202,9 +203,26 @@ public class Client{
         return "";
     }
 
+    private static final Pattern FILE_PATTERN = Pattern.compile("\\d+\\.txt");
+
+    private static int countBatches(String directory) {
+        Path dirPath = Paths.get(directory);
+        try {
+            long count = Files.list(dirPath)
+                            .filter(path -> FILE_PATTERN.matcher(path.getFileName().toString()).matches())
+                            .count();
+            return (int) count;
+        } catch (IOException e) {
+            System.err.println("Error counting batches: " + e.getMessage());
+        }
+        return 0;
+    }
+
     private static void sendScriptedBatches(Random random, NormalRandomVariable batchSizeVariable, String logFilePath) {
         // Initialize batch index
         int i = 0;
+        
+        numOfRequests = countBatches(scriptedBatchesDirectory);
 
         while(i < numOfRequests){
             // determine the size for the next batch
