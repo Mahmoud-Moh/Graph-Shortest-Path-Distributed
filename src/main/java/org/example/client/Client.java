@@ -97,7 +97,7 @@ public class Client{
         
         ensureDirectoryExists(logDirectory);
 
-        deleteFileIfExists(logFilePath);
+        // deleteFileIfExists(logFilePath);
 
         // Initialize the stub
         stub = setupStub();
