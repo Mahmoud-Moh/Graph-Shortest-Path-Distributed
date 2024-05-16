@@ -3,8 +3,8 @@ package org.example.server;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.example.server.graph.solvers.ShortestPathSolver;
+import org.example.server.graph.Graph;
 import org.example.server.metadata.ClientMetaData;
 
 public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInterface {
@@ -12,15 +12,17 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     int maxClients = 0;
     Long startTimeStamp;
     ShortestPathSolver shortestPathSolver;
-    // cache query outputs? (variant idea)
 
+    Graph graph = Graph.getInstance(); ;
+
+    // cache query outputs? (variant idea)
     public void report(String outputDirectory){
         //TODO: report total number of  clients, maxClients, total number of completed requests, mean request processing time, etc.
         //TODO: report for each client its own row in subscribedNodes in a table.
         // Feel free to output multiple files in the `outputDirectory`, use any format you see nice.
         return;
     }
-    
+
     protected GSPRemoteObject() throws RemoteException {
         super();
         clients = new ConcurrentHashMap<>();
@@ -47,27 +49,25 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     }
 
     @Override
-    public synchronized String processBatch(String nodeId, String batch) throws RemoteException {
+    public synchronized String processBatch_fastQuery(String nodeId, String batch) throws RemoteException{
+        System.out.println("Server received a batch from " + nodeId);
+        System.out.println(batch);
         // If not subscribed, do not serve
         if((!clients.containsKey(nodeId)) || clients.get(nodeId).isUnSubscribed()){
             return "Call subscribe first";
         }
 
         Long processingStartTimeStamp = System.currentTimeMillis();
-        
-        // TODO: Process the Batch of operations and return the query outputs (a String of multiple lines).
-        // ..
-        //Processing tha batch and returning query outputs
-        StringBuilder response = new StringBuilder();
+
+        System.out.println("Server started a batch");
+        StringBuilder result = new StringBuilder();
         String[] operations = batch.split("\n");
-        //System.out.println("Mock processing the batch for client with Id " + nodeId);
-        for (int i=0; i < operations.length - 1; i++) {
+        for (int i = 0; i < operations.length - 1; i++) {
             String operation = operations[i];
             String[] parameters = operation.split(" ");
             String operator = parameters[0];
             String fromNode = parameters[1];
             String toNode = parameters[2];
-            System.out.println(operation + "p");
             switch (operator) {
                 case "A":
                     shortestPathSolver.add(Integer.parseInt(fromNode), Integer.parseInt(toNode));
@@ -77,26 +77,98 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
                     break;
                 case "Q":
                     int distance = shortestPathSolver.query(Integer.parseInt(fromNode), Integer.parseInt(toNode));
-                    response.append(distance).append("\n");
+                    result.append(distance).append("\n");
                     break;
                 default:
                     break;
             }
         }
 
+        System.out.println("Server finished a batch");
+        System.out.println(result.toString());
+
         Long processingEndTimeStamp = System.currentTimeMillis();
         Long processingTime = processingEndTimeStamp - processingStartTimeStamp;
-        System.out.println("Processing Time: " + processingTime);
+
         // For reporting
         clients.get(nodeId).registerProcessingTime(processingTime);
         clients.get(nodeId).registerCompletedRequests(1);
 
         // Return the batch output
-        System.out.println("We reached this part");
-        return "This part should be for processing the batch";
+        return "GSPRemoteObject.processBatch called";
+
+    }
+    @Override
+    public synchronized String processBatch(String nodeId, String batch) throws RemoteException {
+
+        System.out.println("Server received a batch from " + nodeId);
+        System.out.println(batch);
+        // If not subscribed, do not serve
+        if((!clients.containsKey(nodeId)) || clients.get(nodeId).isUnSubscribed()){
+            return "Call subscribe first";
+        }
+
+        Long processingStartTimeStamp = System.currentTimeMillis();
+
+        System.out.println("Server started a batch");
+        StringBuilder result = new StringBuilder();
+        String[] batchLines = batch.split("\\s*\r?\n\\s*");
+        for(String line : batchLines){
+            proccessBatchLine(nodeId, line, result);
+        }
+        System.out.println("Server finished a batch");
+        System.out.println(result.toString());
+
+
+        Long processingEndTimeStamp = System.currentTimeMillis();
+        Long processingTime = processingEndTimeStamp - processingStartTimeStamp;
+
+
+
+        // For reporting
+        clients.get(nodeId).registerProcessingTime(processingTime);
+        clients.get(nodeId).registerCompletedRequests(1);
+
+        // Return the batch output
+        return "GSPRemoteObject.processBatch called";
     }
 
     public void setShortestPathSolver(ShortestPathSolver shortestPathSolver){
         this.shortestPathSolver = shortestPathSolver;
+    }
+
+    private void proccessBatchLine(String nodeId, String line, StringBuilder result) {
+        String[] operation =line.split(" ");
+        char queryType =operation[0].charAt(0);
+        if (queryType == 'F') {
+            return ;
+        }
+
+        int u = Integer.parseInt(operation[1]);
+        int v = Integer.parseInt(operation[2]);
+
+        if(queryType == 'A'){
+            graph.addEdge(u, v);
+            System.out.println("Edge added from " + u + " to " + v);
+        }
+        else if(queryType == 'D'){
+            graph.removeEdge(u, v);
+            System.out.println("Edge removed from " + u + " to " + v);
+        }
+        else{
+            int out = graph.shortestPath(u, v, "BFS");
+            System.out.println("Shortest path between " + u + " and " + v + " using " + "BFS" + " is: " + out);
+            result.append(out);
+            result.append("\n");
+        }
+        return ;
+    }
+
+
+    @Override
+    public void x(String nodeId) throws RemoteException {
+        // TODO Auto-generated method stub
+    
+        throw new UnsupportedOperationException("Unimplemented method 'x'");
     }
 }

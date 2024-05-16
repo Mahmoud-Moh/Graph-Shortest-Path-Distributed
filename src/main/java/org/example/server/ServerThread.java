@@ -25,36 +25,50 @@ public class ServerThread extends Thread {
 
     public ServerThread(CountDownLatch latch) {
         this.latch = latch;
-        
+
         try {
             // Get Rmi Registery Server and port from system.properties
             Properties props = GetPropValues.getPropValues();
             port = Integer.parseInt(props.getProperty("GSP.rmiregistry.port"));
-            
+
             // Create Object of the implementation of remote interface
             this.gsp = new GSPRemoteObject();
 
             // Bind the remote object with the name //rmi:://localhost:port/gsp
             LocateRegistry.createRegistry(port);
             Naming.rebind(GetPropValues.getRemoteObjectReference(), gsp);
-        
+
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        
+
     }
 
     @Override
     public void run() {
-        // Read Graph from standard input.
-        graph = GraphReader.readGraph();
-        System.out.println(graph.numOfNodes);
+        // Read Initial Graph from standard input or a file.
+
+        // this.graph = GraphReader.readGraphFromStdInput();
+
+        try {
+            this.graph = GraphReader.readGraphFromFile(GetPropValues.getPropValues().getProperty("GSP.initialGraph"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(3);
+            return;
+        }
+
+        gsp.graph = this.graph;
         ShortestPathSolver shortestPathSolver = new ShortestPathSolver(graph);
-        gsp.setShortestPathSolver(shortestPathSolver);
+        gsp.shortestPathSolver = shortestPathSolver;
+        System.out.println("R");
+
         // Signal the parent thread when ready.
         latch.countDown();
+
+        // ... listen
 
     }
 }

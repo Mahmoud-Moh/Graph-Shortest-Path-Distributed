@@ -7,7 +7,6 @@ import java.util.*;
 
 import static java.lang.Integer.min;
 
-// To allow switching to a different algo later if ever needed.
 public class ShortestPathSolver {
 
     Graph graph, reversed_graph;
@@ -18,61 +17,72 @@ public class ShortestPathSolver {
         this.graph = graph;
         this.numOfNodes = graph.numOfNodes;
         this.reversed_graph = graph.reverseGraph();
-        this.dict = new ArrayList<>(numOfNodes + 1);
-        for(int i=0; i < numOfNodes + 1; i++) {
-            dict.add(new ArrayList<>(Collections.nCopies(numOfNodes + 1, -1))); // Initial fill with -1 (or any default value)
-            }
         generateDictionary();
     }
 
     public int query(int fromNode, int toNode){
-        System.out.println(dict.size());
         return dict.get(fromNode).get(toNode);
     }
 
     public void add(int fromNode, int toNode){
         //If there's already an edge between the two nodes
-        reversed_graph.addEdge(toNode, fromNode);
-        if(dict.get(fromNode).get(toNode) != 1){
-            dict.get(fromNode).set(toNode, 1);
-            for(int i=0; i<numOfNodes && i != fromNode && i != toNode; i++){
-                int distance_to_from = dict.get(i).get(fromNode);
-                int distance_to_to = dict.get(i).get(toNode);
-                if(distance_to_from != -1){
-                    if(distance_to_to == -1)
-                        dict.get(i).set(toNode, distance_to_from + 1);
-                    else {
-                        dict.get(i).set(toNode, min(distance_to_to, distance_to_from + 1));
-                    }
-                }
+        if(dict.get(fromNode).get(toNode) == 1){
+            System.out.println("there's already an edge between the two nodes " + fromNode + ", " + toNode);
+            return;
+        }
+        //Update graph
+        graph.addEdge(fromNode, toNode);
+
+        //Update dictionary
+        //Find all nodes that can reach fromNode (node = fromNode, graph = reversed_graph)
+        HashMap<Integer, Integer> node_distance_map1 = bfs(reversed_graph, fromNode);
+        //Find all nodes that are reachable from toNode (node = fromNode, graph = graph)
+        HashMap<Integer, Integer> node_distance_map2 = bfs(graph, toNode);
+        //Update distances from all these nodes to each other
+        for(Map.Entry<Integer, Integer> entry1 : node_distance_map1.entrySet()){
+            int node1 = entry1.getKey();
+            int distance_to_fromNode = entry1.getValue();
+            for(Map.Entry<Integer, Integer> entry2 : node_distance_map2.entrySet()){
+                int node2 = entry2.getKey();
+                int distance_to_toNode = entry2.getValue();
+                if(dict.get(node1).get(node2) == -1)
+                    dict.get(node1).set(node2, distance_to_fromNode + 1 + distance_to_toNode);
+                else
+                    dict.get(node1).set(node2, min(dict.get(node1).get(node2), distance_to_fromNode + 1 + distance_to_toNode));
+
             }
         }
+        //Update Reverse Graph
+        reversed_graph.addEdge(toNode, fromNode);
     }
 
     public void delete(int fromNode, int toNode){
+        //Update graph
+        graph.removeEdge(fromNode, toNode);
+
+        //Update dictionary
+        generateDictionary();
+
+        //Update Reverse Graph
         reversed_graph.removeEdge(toNode, fromNode);
-        dict.get(fromNode).set(toNode, -1);
-        HashMap<Integer, Integer> distances = bfs(reversed_graph, toNode);
-        for(Map.Entry<Integer, Integer> entry : distances.entrySet()){
-            int node = entry.getKey();
-            int distance = entry.getValue();
-            dict.get(node).set(toNode, distance);
-        }
     }
     public void generateDictionary(){
         //Costly process, this code should be parallelized per node
         //Assumption graph size < 256 (Number of threads per JVM)
-        HashMap<Integer, HashSet<Integer>> adj = graph.adj;
+        List<List<Integer>> new_dict = new ArrayList<>(numOfNodes + 1);
+        for(int i=0; i < numOfNodes + 1; i++) {
+            new_dict.add(new ArrayList<>(Collections.nCopies(numOfNodes + 1, -1))); // Initial fill with -1 (or any default value)
+        }
         for(int i=1; i <= numOfNodes; i++){
-            //dict.set(i, new ArrayList<>(numOfNodes + 1)) ;
-            for(int j=1; j <= numOfNodes; j++){
-                int distance = bfs(adj, i, j);
-                dict.get(i).set(j, distance);
+            HashMap<Integer, Integer> node_distance_map = bfs(graph, i);
+            for(Map.Entry<Integer, Integer> entry : node_distance_map.entrySet()) {
+                new_dict.get(i).set(entry.getKey(), entry.getValue());
             }
         }
+        this.dict = new_dict;
     }
 
-    public static int bfs(HashMap<Integer, HashSet<Integer>> graph, int start, int end) {
+    /*public static int bfs(HashMap<Integer, HashSet<Integer>> graph, int start, int end) {
         // Create a queue for BFS
         Queue<Pair> queue = new LinkedList<>();
         // Enqueue the start node along with its distance
@@ -101,7 +111,7 @@ public class ShortestPathSolver {
         }
         // If the destination is not reachable from the source
         return -1;
-    }
+    }*/
 
     public static HashMap<Integer, Integer> bfs(Graph graph, int start) {
         HashMap<Integer, HashSet<Integer>> adj = graph.adj;
