@@ -1,11 +1,14 @@
 package org.example.server;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import org.example.server.graph.solvers.ShortestPathSolver;
 import org.example.server.graph.Graph;
 import org.example.server.metadata.ClientMetaData;
+import org.example.utils.GetPropValues;
 
 public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInterface {
     ConcurrentHashMap<String, ClientMetaData> clients;
@@ -13,7 +16,9 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     Long startTimeStamp;
     ShortestPathSolver shortestPathSolver;
 
-    Graph graph = Graph.getInstance(); ;
+    final int useIncrementalSolver;
+
+    Graph graph = Graph.getInstance();
 
     // cache query outputs? (variant idea)
     public void report(String outputDirectory){
@@ -23,10 +28,13 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         return;
     }
 
-    protected GSPRemoteObject() throws RemoteException {
+    protected GSPRemoteObject() throws IOException {
         super();
         clients = new ConcurrentHashMap<>();
         startTimeStamp = System.currentTimeMillis();
+
+        Properties params = GetPropValues.getPropValues();
+        useIncrementalSolver = Integer.parseInt(params.getProperty("GSP.useIncrementalSolver").trim());
     }
 
     @Override
@@ -49,7 +57,20 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     }
 
     @Override
-    public synchronized String processBatch_fastQuery(String nodeId, String batch) throws RemoteException{
+    public synchronized String processBatch(String nodeId, String batch) throws RemoteException {
+        switch (useIncrementalSolver) {
+            case 1:
+                return processBatchIncremental(nodeId, batch);
+
+            case 0:
+                return processBatchBFS(nodeId, batch);
+
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
+    public synchronized String processBatchIncremental(String nodeId, String batch){
         System.out.println("Server received a batch from " + nodeId);
         System.out.println(batch);
         // If not subscribed, do not serve
@@ -80,7 +101,7 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
                     result.append(distance).append("\n");
                     break;
                 default:
-                    break;
+                break;
             }
         }
 
@@ -98,8 +119,9 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         return "GSPRemoteObject.processBatch called";
 
     }
-    @Override
-    public synchronized String processBatch(String nodeId, String batch) throws RemoteException {
+
+
+    public String processBatchBFS(String nodeId, String batch) {
 
         System.out.println("Server received a batch from " + nodeId);
         System.out.println(batch);
