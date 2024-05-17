@@ -10,11 +10,25 @@ def get_csv_filenames(folder):
     return filenames
 
 
+def remove_outliers(df):
+    # Calculate Q1 (25th percentile) and Q3 (75th percentile)
+    Q1 = df['ResponseTime'].quantile(0.25)
+    Q3 = df['ResponseTime'].quantile(0.75)
+    IQR = Q3 - Q1
+
+    # Define the lower and upper bounds for outliers
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+
+    # Filter the DataFrame to remove outliers
+    df_no_outliers = df[(df['ResponseTime'] >= lower_bound) & (df['ResponseTime'] <= upper_bound)]
+    return df_no_outliers
+
 # read one csv file into df
 def read_csv_file(folder, filename):
     path = os.path.join(folder, filename)
     df = pd.read_csv(path)
-    df = df[10:]
+    # df = df[10:]
     return df
 
 
@@ -27,6 +41,7 @@ def read_csv_files(folder):
     for filename in filenames:
         df = read_csv_file(folder, filename)
         df['nodes']=len
+        df = remove_outliers(df)
         dfs.append(df)
     return dfs
 
@@ -48,8 +63,6 @@ def summarize(dfs):
         max_index = df['Index'].max()
         k = max_index + 1
         # add run column to each k group
-
-
 #Index,StartTimestamp,EndTimestamp,ResponseTime,Batch,BatchOutput,writePercentage,addOps,deleteOps,queryOps,batchSize,timeSleptAfterThisBatch
 
         df['run'] = (df.index) // k
@@ -139,25 +152,87 @@ def get_folder_names(folder):
     return folder_names
 
 experiments_folders = get_folder_names('experiments')
-# frequency_vs_response_time_all
+
+wp_vs_rt_table = pd.DataFrame()
+f_vs_rt_table = pd.DataFrame()
+c_vs_rt_table = pd.DataFrame()
 
 for folder in experiments_folders:
     folder = os.path.join('experiments', folder)
     print("Processing folder ", folder)
     dfs = read_csv_files(folder)
+
+
     summarized_dfs = summarize(dfs)
     merged_df = merge_summarized_dfs(summarized_dfs)
-    frequency_vs_response_time = calculate_frequency_vs_response_time(merged_df)
-    write_percentage_vs_response_time = calculate_write_percentage_vs_response_time(merged_df)
-    nodes_vs_response_time = calculate_nodes_vs_response_time(merged_df)
+    # if folders contains write
+    if(folder.find("write") != -1):
+        #append to write_percentage_vs_response_time_table
+        wp_vs_rt_table = wp_vs_rt_table._append(calculate_write_percentage_vs_response_time(merged_df))
+    # if folders contains clients
+    if(folder.find("sleep") != -1):
+        #append to frequency_vs_response_time_table
+        f_vs_rt_table = f_vs_rt_table._append(calculate_frequency_vs_response_time(merged_df))
     
-    print(frequency_vs_response_time)
-    print(write_percentage_vs_response_time)
-    print(nodes_vs_response_time)
-    print()
-    print()
-    # save to csv
-    # merged_df.to_csv('merged.csv')
-    # frequency_vs_response_time.to_csv('frequency_vs_response_time.csv')
-    # write_percentage_vs_response_time.to_csv('write_percentage_vs_response_time.csv')
-    # nodes_vs_response_time.to_csv('nodes_vs_response_time.csv')
+    if(folder.find("clients") != -1):
+        #append to nodes_vs_response_time_table
+        c_vs_rt_table = c_vs_rt_table._append(calculate_nodes_vs_response_time(merged_df))
+
+
+#sort the dataframe by the first column
+wp_vs_rt_table = wp_vs_rt_table.sort_values(by='calculatedWritePercentage')
+f_vs_rt_table = f_vs_rt_table.sort_values(by='frequency')
+c_vs_rt_table = c_vs_rt_table.sort_values(by='nodes')
+
+
+# create results directory if it doesn't exist
+if not os.path.exists('results'):
+    os.makedirs('results')
+
+# save each table to csv, overwrite
+wp_vs_rt_table.to_csv('results/write_percentage_vs_response_time.csv', index=False)
+f_vs_rt_table.to_csv('results/frequency_vs_response_time.csv', index=False)
+c_vs_rt_table.to_csv('results/nodes_vs_response_time.csv', index=False)
+
+
+
+
+
+experiments_folders = get_folder_names('experiments_inc')
+
+wp_vs_rt_table = pd.DataFrame()
+f_vs_rt_table = pd.DataFrame()
+c_vs_rt_table = pd.DataFrame()
+
+for folder in experiments_folders:
+    folder = os.path.join('experiments_inc', folder)
+    print("Processing folder ", folder)
+    dfs = read_csv_files(folder)
+    summarized_dfs = summarize(dfs)
+    merged_df = merge_summarized_dfs(summarized_dfs)
+    # if folders contains write
+    if(folder.find("write") != -1):
+        #append to write_percentage_vs_response_time_table
+        wp_vs_rt_table = wp_vs_rt_table._append(calculate_write_percentage_vs_response_time(merged_df))
+    # if folders contains clients
+    if(folder.find("sleep") != -1):
+        #append to frequency_vs_response_time_table
+        f_vs_rt_table = f_vs_rt_table._append(calculate_frequency_vs_response_time(merged_df))
+    
+    if(folder.find("clients") != -1):
+        #append to nodes_vs_response_time_table
+        c_vs_rt_table = c_vs_rt_table._append(calculate_nodes_vs_response_time(merged_df))
+
+#sort the dataframe by the first column
+# wp_vs_rt_table = wp_vs_rt_table.sort_values(by='calculatedWritePercentage')
+f_vs_rt_table = f_vs_rt_table.sort_values(by='frequency')
+c_vs_rt_table = c_vs_rt_table.sort_values(by='nodes')
+
+# create results directory if it doesn't exist
+if not os.path.exists('results_inc'):
+    os.makedirs('results_inc')
+
+# save each table to csv, overwrite
+# wp_vs_rt_table.to_csv('results_inc/write_percentage_vs_response_time_inc.csv', index=False)
+f_vs_rt_table.to_csv('results_inc/frequency_vs_response_time_inc.csv', index=False)
+c_vs_rt_table.to_csv('results_inc/nodes_vs_response_time_inc.csv', index=False)

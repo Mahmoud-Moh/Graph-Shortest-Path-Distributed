@@ -23,7 +23,7 @@ public class Start {
     public static void main(String[] args) throws IOException, InterruptedException {
         // a signaling mechanism to get notified when the server thread is ready to recieve requests
         CountDownLatch latch = new CountDownLatch(1);
-
+    
         // Create the server thread
         ServerThread serverThread = new ServerThread(latch);
 
