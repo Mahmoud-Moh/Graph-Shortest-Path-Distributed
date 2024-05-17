@@ -14,11 +14,11 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     ConcurrentHashMap<String, ClientMetaData> clients;
     int maxClients = 0;
     Long startTimeStamp;
-    ShortestPathSolver shortestPathSolver;
 
     final int useIncrementalSolver;
 
     Graph graph = Graph.getInstance();
+    ShortestPathSolver shortestPathSolver;
 
     // cache query outputs? (variant idea)
     public void report(String outputDirectory){
@@ -98,10 +98,11 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
                     break;
                 case "Q":
                     int distance = shortestPathSolver.query(Integer.parseInt(fromNode), Integer.parseInt(toNode));
+                    System.out.println("distance : "+ distance);
                     result.append(distance).append("\n");
                     break;
                 default:
-                break;
+                    break;
             }
         }
 
@@ -155,9 +156,6 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         return "GSPRemoteObject.processBatch called";
     }
 
-    public void setShortestPathSolver(ShortestPathSolver shortestPathSolver){
-        this.shortestPathSolver = shortestPathSolver;
-    }
 
     private void proccessBatchLine(String nodeId, String line, StringBuilder result) {
         String[] operation =line.split(" ");

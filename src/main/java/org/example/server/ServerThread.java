@@ -14,7 +14,6 @@ import java.util.concurrent.CountDownLatch;
 
 public class ServerThread extends Thread {
     private Graph graph;
-
     private CountDownLatch latch;   // To signal the parent thread (Start.java:main) when ready to handle requests.
     private int port = 49053;
     GSPRemoteObject gsp;
