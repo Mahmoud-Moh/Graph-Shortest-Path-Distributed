@@ -21,6 +21,8 @@ public class ShortestPathSolver {
     }
 
     public int query(int fromNode, int toNode){
+        if(fromNode > numOfNodes || toNode > numOfNodes)
+            return -1;
         return dict.get(fromNode).get(toNode);
     }
 
