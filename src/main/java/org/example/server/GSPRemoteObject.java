@@ -107,7 +107,7 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         }
 
         System.out.println("Server finished a batch");
-        System.out.println(result.toString());
+        // System.out.println(result.toString());
 
         Long processingEndTimeStamp = System.currentTimeMillis();
         Long processingTime = processingEndTimeStamp - processingStartTimeStamp;
@@ -117,7 +117,7 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         clients.get(nodeId).registerCompletedRequests(1);
 
         // Return the batch output
-        return "GSPRemoteObject.processBatch called";
+        return result.toString();
 
     }
 
@@ -140,20 +140,18 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
             proccessBatchLine(nodeId, line, result);
         }
         System.out.println("Server finished a batch");
-        System.out.println(result.toString());
+        // System.out.println(result.toString());
 
 
         Long processingEndTimeStamp = System.currentTimeMillis();
         Long processingTime = processingEndTimeStamp - processingStartTimeStamp;
-
-
 
         // For reporting
         clients.get(nodeId).registerProcessingTime(processingTime);
         clients.get(nodeId).registerCompletedRequests(1);
 
         // Return the batch output
-        return "GSPRemoteObject.processBatch called";
+        return result.toString();
     }
 
 

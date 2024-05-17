@@ -21,7 +21,7 @@ public class ClientLogger {
 
                 // Replace newline characters with the delimiter
                 batch = batch.replaceAll("\\s*\r?\n\\s*", LINE_DELIMITER);
-                batchOutput = batchOutput.replace("\\s*\r?\n\\s*", LINE_DELIMITER);
+                batchOutput = batchOutput.replaceAll("\\s*\r?\n\\s*", LINE_DELIMITER);
 
                 writer.println(index + "," + startTimestamp + "," + endTimestamp + "," + latency + "," + batch + "," + batchOutput + "," + writePercentage + "," + addOpsCount + "," + deleteOpsCount + "," + queryOpsCount + "," + batchSize  + "," + timeSleptAfterThisBatch);
             }
