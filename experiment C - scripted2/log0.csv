@@ -1,7 +1,0 @@
-Index, StartTimestamp, EndTimestamp, ResponseTime, Batch, BatchOutput, writePercentage, addOps, deleteOps, queryOps, batchSize, timeSleptAfterThisBatch
-0, 1715888564489, 1715888564492, 3, Q 1 3 & A 4 5 & Q 1 5 & Q 5 1 & F & , GSPRemoteObject.processBatch called, -1.0, -1, -1, -1, 23, 1000
-1, 1715888565544, 1715888565546, 2, A 5 3 & Q 1 3 & D 2 3 & Q 1 3 & F, GSPRemoteObject.processBatch called, -1.0, -1, -1, -1, 16, 1000
-0, 1715892708200, 1715892708234, 34, Q 1 3 & A 4 5 & Q 1 5 & Q 5 1 & F & , GSPRemoteObject.processBatch called, -1.0, -1, -1, -1, 23, 1000
-1, 1715892709281, 1715892709284, 3, A 5 3 & Q 1 3 & D 2 3 & Q 1 3 & F, GSPRemoteObject.processBatch called, -1.0, -1, -1, -1, 16, 1000
-0, 1715892811055, 1715892811082, 27, Q 1 3 & A 4 5 & Q 1 5 & Q 5 1 & F & , GSPRemoteObject.processBatch called, -1.0, -1, -1, -1, 23, 1000
-1, 1715892812132, 1715892812136, 4, A 5 3 & Q 1 3 & D 2 3 & Q 1 3 & F, GSPRemoteObject.processBatch called, -1.0, -1, -1, -1, 16, 1000
