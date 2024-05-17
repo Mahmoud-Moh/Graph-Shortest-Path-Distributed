@@ -14,6 +14,7 @@ def get_csv_filenames(folder):
 def read_csv_file(folder, filename):
     path = os.path.join(folder, filename)
     df = pd.read_csv(path)
+    df = df[10:]
     return df
 
 
@@ -111,7 +112,8 @@ def merge_summarized_dfs(summarized_dfs):
 # for each run calculate frequency which is number of batches / total time
 # return table (df) with run number and frequency vs response time
 def calculate_frequency_vs_response_time(df):
-    df['frequency'] = 1000*df['numBatches'] / ((df['EndTimestamp'] - df['StartTimestamp']))
+    df['frequency'] = 1000*df['numBatches'] /                          \
+                ((df['EndTimestamp'] - df['StartTimestamp']))
     return df[['frequency', 'ResponseTime']]
 
 
@@ -139,7 +141,7 @@ def get_folder_names(folder):
 experiments_folders = get_folder_names('experiments')
 for folder in experiments_folders:
     folder = os.path.join('experiments', folder)
-    print(">>>>>>> Processing folder ", folder)
+    print("Processing folder ", folder)
     dfs = read_csv_files(folder)
     summarized_dfs = summarize(dfs)
     merged_df = merge_summarized_dfs(summarized_dfs)
@@ -149,6 +151,8 @@ for folder in experiments_folders:
     print(frequency_vs_response_time)
     print(write_percentage_vs_response_time)
     print(nodes_vs_response_time)
+    print()
+    print()
     # save to csv
     # merged_df.to_csv('merged.csv')
     # frequency_vs_response_time.to_csv('frequency_vs_response_time.csv')
