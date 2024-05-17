@@ -154,6 +154,20 @@ def get_folder_names(folder):
     return folder_names
 
 
+# dfs = read_csv_files('experiments/experiment1_w0_sparse')
+# summarized_dfs = summarize(dfs)
+# merged_df = merge_summarized_dfs(summarized_dfs)
+# print(merged_df['ResponseTime'])
+
+
+
+
+# dfs_inc = read_csv_files('experiments_inc/experiment1_w0_sparse')
+# summarized_dfs_inc = summarize(dfs_inc)
+# merged_df_inc = merge_summarized_dfs(summarized_dfs_inc)
+# print(merged_df_inc['ResponseTime'])
+
+
 def do_analysis(log_folder, results_folder):
     experiments_folders = get_folder_names(log_folder)
 
@@ -194,8 +208,8 @@ def do_analysis(log_folder, results_folder):
     f_vs_rt_table.to_csv(results_folder + '/frequency_vs_response_time.csv', index=False)
     c_vs_rt_table.to_csv(results_folder + '/nodes_vs_response_time.csv', index=False)
 
-do_analysis('experiments', 'results')
-do_analysis('experiments_inc', 'results_inc')
+do_analysis('experiments', 'results2')
+do_analysis('experiments_inc', 'results_inc2')
 
 
 #plot each csv in folder and save plots to that folder
@@ -216,7 +230,8 @@ def plot_csv_files(folder):
         plt.savefig(plot_path)
         plt.close()
 
-plot_csv_files('results')
+plot_csv_files('results2')
+plot_csv_files('results_inc2')
 
 
 
@@ -252,4 +267,14 @@ def plot_csv_files(folder1, folder2):
         plt.savefig(plot_path)
         plt.close()
 
-plot_csv_files('results', 'results_inc')
+plot_csv_files('results2', 'results_inc2')
+
+# import random
+
+# with open('pairs.txt', 'w') as f:
+ 
+#     for i in range(8000): 
+#         x = random.randint(1, 200)
+#         y = random.randint(1, 200)
+#         f.write(f'{x} {y}\n')
+#     f.write('S')
