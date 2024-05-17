@@ -36,3 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+src/main/resources/clients.properties
+src/main/resources/clients.properties
+src/main/resources/system.properties
+src/main/resources/clients.properties

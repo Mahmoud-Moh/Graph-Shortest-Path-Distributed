@@ -50,7 +50,7 @@ public class Start {
             int seed = 42;
             for (int i = 0; i < clientIds.length; i++) {
                 // Command to run the client process
-                String[] command = {"java", "-cp", CLASSPATH, "org.example.client.Client", clientIds[i], "3", String.valueOf(seed)};
+                String[] command = {"java", "-cp", CLASSPATH, "org.example.client.Client", clientIds[i], String.valueOf(seed)};
 
                 // Create a ProcessBuilder with the command
                 ProcessBuilder pb = new ProcessBuilder(command);

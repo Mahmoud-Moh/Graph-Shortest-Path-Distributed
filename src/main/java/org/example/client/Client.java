@@ -80,7 +80,8 @@ public class Client{
              return;
          }
 
-
+        //  clientId = "6";
+        //  seed = 65;
         try {
             loadParams();
         } catch (IOException e) {
@@ -180,6 +181,8 @@ public class Client{
             } catch (RemoteException | InterruptedException e) {
                 e.printStackTrace();
                 ClientLogger.log(logFilePath, i, -1, -1, -1, batch, e.getMessage(),batchGenerator.lastBatchWritePercentage,batchGenerator.lastBatchAddOpsCount, batchGenerator.lastBatchDeleteOpsCount,batchGenerator.lastBatchQueryOpsCount, batchSize, sleepDuration);
+                System.exit(3);
+                return;
             }   
         }
     }

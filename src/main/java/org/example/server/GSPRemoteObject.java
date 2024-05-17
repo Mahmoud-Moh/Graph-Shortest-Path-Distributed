@@ -14,11 +14,11 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     ConcurrentHashMap<String, ClientMetaData> clients;
     int maxClients = 0;
     Long startTimeStamp;
-    ShortestPathSolver shortestPathSolver;
 
     final int useIncrementalSolver;
 
     Graph graph = Graph.getInstance();
+    ShortestPathSolver shortestPathSolver;
 
     // cache query outputs? (variant idea)
     public void report(String outputDirectory){
@@ -98,15 +98,16 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
                     break;
                 case "Q":
                     int distance = shortestPathSolver.query(Integer.parseInt(fromNode), Integer.parseInt(toNode));
+                    System.out.println("distance : "+ distance);
                     result.append(distance).append("\n");
                     break;
                 default:
-                break;
+                    break;
             }
         }
 
         System.out.println("Server finished a batch");
-        System.out.println(result.toString());
+        // System.out.println(result.toString());
 
         Long processingEndTimeStamp = System.currentTimeMillis();
         Long processingTime = processingEndTimeStamp - processingStartTimeStamp;
@@ -116,7 +117,7 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
         clients.get(nodeId).registerCompletedRequests(1);
 
         // Return the batch output
-        return "GSPRemoteObject.processBatch called";
+        return result.toString();
 
     }
 
@@ -139,25 +140,20 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
             proccessBatchLine(nodeId, line, result);
         }
         System.out.println("Server finished a batch");
-        System.out.println(result.toString());
+        // System.out.println(result.toString());
 
 
         Long processingEndTimeStamp = System.currentTimeMillis();
         Long processingTime = processingEndTimeStamp - processingStartTimeStamp;
-
-
 
         // For reporting
         clients.get(nodeId).registerProcessingTime(processingTime);
         clients.get(nodeId).registerCompletedRequests(1);
 
         // Return the batch output
-        return "GSPRemoteObject.processBatch called";
+        return result.toString();
     }
 
-    public void setShortestPathSolver(ShortestPathSolver shortestPathSolver){
-        this.shortestPathSolver = shortestPathSolver;
-    }
 
     private void proccessBatchLine(String nodeId, String line, StringBuilder result) {
         String[] operation =line.split(" ");
