@@ -16,14 +16,14 @@ public class ClientLogger {
             try (PrintWriter writer = new PrintWriter(new FileWriter(logFilePath, !isNewFile))) {
                 // If it's a new file, add headers
                 if (isNewFile) {
-                    writer.println("Index, StartTimestamp, EndTimestamp, ResponseTime, Batch, BatchOutput, writePercentage, addOps, deleteOps, queryOps, batchSize, timeSleptAfterThisBatch");
+                    writer.println("Index,StartTimestamp,EndTimestamp,ResponseTime,Batch,BatchOutput,writePercentage,addOps,deleteOps,queryOps,batchSize,timeSleptAfterThisBatch");
                 }
 
                 // Replace newline characters with the delimiter
                 batch = batch.replaceAll("\\s*\r?\n\\s*", LINE_DELIMITER);
                 batchOutput = batchOutput.replace("\\s*\r?\n\\s*", LINE_DELIMITER);
 
-                writer.println(index + ", " + startTimestamp + ", " + endTimestamp + ", " + latency + ", " + batch + ", " + batchOutput + ", " + writePercentage + ", " + addOpsCount + ", " + deleteOpsCount + ", " + queryOpsCount + ", " + batchSize  + ", " + timeSleptAfterThisBatch);
+                writer.println(index + "," + startTimestamp + "," + endTimestamp + "," + latency + "," + batch + "," + batchOutput + "," + writePercentage + "," + addOpsCount + "," + deleteOpsCount + "," + queryOpsCount + "," + batchSize  + "," + timeSleptAfterThisBatch);
             }
         } catch (IOException e) {
             e.printStackTrace();
