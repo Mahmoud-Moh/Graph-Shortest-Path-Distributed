@@ -6,7 +6,9 @@ import java.util.Random;
 
 public class BatchGenerator {    
     Random random;
-    NormalRandomVariable writePercentageVariable; 
+    NormalRandomVariable writePercentageVariable;
+
+    static final int MAX_VERTICES = 200;
     
     double lastBatchWritePercentage = -1;
     
@@ -60,8 +62,8 @@ public class BatchGenerator {
             }
             
             // generate two random positive integer node IDs
-            int nodeID1 = random.nextInt(10) + 1;
-            int nodeID2 = random.nextInt(10) + 1;
+            int nodeID1 = random.nextInt(MAX_VERTICES) + 1;
+            int nodeID2 = random.nextInt(MAX_VERTICES) + 1;
             
             // append the operation to the batch
             batchString.append(operationType).append(" ").append(nodeID1).append(" ").append(nodeID2).append("\n");
