@@ -139,6 +139,8 @@ def get_folder_names(folder):
     return folder_names
 
 experiments_folders = get_folder_names('experiments')
+frequency_vs_response_time_all
+
 for folder in experiments_folders:
     folder = os.path.join('experiments', folder)
     print("Processing folder ", folder)
@@ -148,6 +150,7 @@ for folder in experiments_folders:
     frequency_vs_response_time = calculate_frequency_vs_response_time(merged_df)
     write_percentage_vs_response_time = calculate_write_percentage_vs_response_time(merged_df)
     nodes_vs_response_time = calculate_nodes_vs_response_time(merged_df)
+    
     print(frequency_vs_response_time)
     print(write_percentage_vs_response_time)
     print(nodes_vs_response_time)
