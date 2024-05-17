@@ -139,7 +139,7 @@ def get_folder_names(folder):
     return folder_names
 
 experiments_folders = get_folder_names('experiments')
-frequency_vs_response_time_all
+# frequency_vs_response_time_all
 
 for folder in experiments_folders:
     folder = os.path.join('experiments', folder)
