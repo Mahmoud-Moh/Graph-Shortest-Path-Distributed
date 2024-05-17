@@ -80,7 +80,17 @@ public class Start {
 
         try (OutputStream outputStream = new FileOutputStream(filePath)) {
             GetPropValues.getClientParams().store(outputStream, "Client Parameters");
-            System.out.println("Parameters saved to " + filePath);
+            System.out.println("Client Parameters saved to " + filePath);
+        } catch (IOException e) {
+            System.err.println("Error saving properties to file: " + e.getMessage());
+        }
+
+        // Save the used parameters 
+        filePath = Paths.get(GetPropValues.getClientParams().getProperty("logDirectory"), "system.properties").toString();
+
+        try (OutputStream outputStream = new FileOutputStream(filePath)) {
+            GetPropValues.getPropValues().store(outputStream, "System Parameters");
+            System.out.println("System Parameters saved to " + filePath);
         } catch (IOException e) {
             System.err.println("Error saving properties to file: " + e.getMessage());
         }
