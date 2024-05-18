@@ -1,0 +1,4 @@
+Total Clients: 1
+Max Clients: 1
+Total Requests: 2
+Mean Request Processing Time: 64.0

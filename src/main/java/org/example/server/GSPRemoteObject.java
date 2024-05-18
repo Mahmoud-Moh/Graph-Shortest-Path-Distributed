@@ -120,7 +120,8 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
 
         System.out.println("Server started a batch");
         StringBuilder result = new StringBuilder();
-        String[] operations = batch.split("\n");
+        String[] operations = batch.split("\\s*\r?\n\\s*");
+
         for (int i = 0; i < operations.length - 1; i++) {
             String operation = operations[i];
             String[] parameters = operation.split(" ");

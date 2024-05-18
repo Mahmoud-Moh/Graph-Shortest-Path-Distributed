@@ -1,0 +1,3 @@
+Index,StartTimestamp,EndTimestamp,ResponseTime,Batch,BatchOutput,writePercentage,addOps,deleteOps,queryOps,batchSize,timeSleptAfterThisBatch
+0,1716054286913,1716054287001,88,Q 1 3 & A 4 5 & Q 1 5 & Q 5 1 & F & ,2 & 2 & 2 & ,-1.0,-1,-1,-1,27,45
+1,1716054287172,1716054287217,45,A 5 3 & Q 1 3 & D 2 3 & Q 1 3 & F,2 & 2 & ,-1.0,-1,-1,-1,15,391
