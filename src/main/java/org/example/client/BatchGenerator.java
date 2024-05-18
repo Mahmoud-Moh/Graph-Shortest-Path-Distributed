@@ -31,7 +31,7 @@ public class BatchGenerator {
     }
 
     public String generateBatch(int numOfOperations) {
-        return generateBatch(numOfOperations, 50);
+        return generateBatch(numOfOperations, 65);
     }
     
     public String generateBatch(int numOfOperations, double addOfWritePercentage) {

@@ -1,8 +1,14 @@
 package org.example.server;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import org.example.server.graph.solvers.ShortestPathSolver;
@@ -20,12 +26,44 @@ public class GSPRemoteObject extends UnicastRemoteObject implements GSPRemoteInt
     Graph graph = Graph.getInstance();
     ShortestPathSolver shortestPathSolver;
 
-    // cache query outputs? (variant idea)
-    public void report(String outputDirectory){
-        //TODO: report total number of  clients, maxClients, total number of completed requests, mean request processing time, etc.
-        //TODO: report for each client its own row in subscribedNodes in a table.
-        // Feel free to output multiple files in the `outputDirectory`, use any format you see nice.
-        return;
+    public void report(String outputDirectory) {
+        try {
+            generateOverallReport(outputDirectory);
+            generateClientDetailsReport(outputDirectory);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void generateOverallReport(String outputDirectory) throws IOException {
+        int totalClients = clients.size();
+        int totalRequests = clients.values().stream().mapToInt(ClientMetaData::getTotalRequests).sum();
+        long totalProcessingTime = clients.values().stream().mapToLong(ClientMetaData::getTotalProcessingTime).sum();
+        double meanProcessingTime = totalRequests > 0 ? (double) totalProcessingTime / totalRequests : 0;
+
+        Path overallReportPath = Paths.get(outputDirectory, "server_report_overall.txt");
+        try (BufferedWriter writer = Files.newBufferedWriter(overallReportPath)) {
+            writer.write("Total Clients: " + totalClients + "\n");
+            writer.write("Max Clients: " + maxClients + "\n");
+            writer.write("Total Requests: " + totalRequests + "\n");
+            writer.write("Mean Request Processing Time: " + meanProcessingTime + "\n");
+        }
+    }
+
+    private void generateClientDetailsReport(String outputDirectory) throws IOException {
+        Path clientDetailsReportPath = Paths.get(outputDirectory, "server_report_client_details.txt");
+        try (BufferedWriter writer = Files.newBufferedWriter(clientDetailsReportPath)) {
+            writer.write("ClientID, Unsubscribed, Subscription TimeStamp, Unsubscription TimeStamp, Total Requests, Total Processing Time\n");
+            for (Map.Entry<String, ClientMetaData> entry : clients.entrySet()) {
+                ClientMetaData client = entry.getValue();
+                writer.write(client.getClientId() + ", " +
+                        client.isUnSubscribed() + ", " +
+                        client.getSubscriptionTimeStamp() + ", " +
+                        client.getUnSubscriptionTimeStamp() + ", " +
+                        client.getTotalRequests() + ", " +
+                        client.getTotalProcessingTime() + "\n");
+            }
+        }
     }
 
     protected GSPRemoteObject() throws IOException {
